@@ -1,1 +1,8 @@
-mini-project1/output
+mini-project1/output/*
+mini-project2/build/*
+mini-project2/devel/*
+mini-project2/logs/*
+mini-project2/src/miniproject2/2017_06_23_dyrskuepladsen.mp4
+mini-project2/src/miniproject2/venv/*
+mini-project2/src/miniproject2/.idea/*
+mini-project2/.catkin_tools/*
