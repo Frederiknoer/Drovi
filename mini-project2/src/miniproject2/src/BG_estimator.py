@@ -17,10 +17,14 @@ class BackGroundFilter:
         self.image_pub = rospy.Publisher("Image_BG_filtered", Image, queue_size=10)
         self.image_sub = rospy.Subscriber("analyzed_image", Image, self.callback)
         self.bridge = CvBridge()
+        rospy.get_param("kernelSize",self.changeKernel)
+
 
         self.fgbg = cv2.createBackgroundSubtractorMOG2(detectShadows=False)
         self.kernel = np.ones((5,5),np.uint8)
 
+    def changeKernel(self,data):
+        self.kernel = np.ones((data,data),np.uint8)
 
     def callback(self, data):
         frame = CvBridge().imgmsg_to_cv2(data,'bgr8')
