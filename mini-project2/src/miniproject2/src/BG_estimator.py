@@ -20,7 +20,7 @@ class BackGroundFilter:
         rospy.get_param("kernelSize",self.changeKernel)
 
 
-        self.fgbg = cv2.createBackgroundSubtractorMOG2(detectShadows=False)
+        self.fgbg = cv2.createBackgroundSubtractorMOG2(history=3,detectShadows=False)
         self.kernel = np.ones((5,5),np.uint8)
 
     def changeKernel(self,data):
@@ -30,9 +30,18 @@ class BackGroundFilter:
         frame = CvBridge().imgmsg_to_cv2(data,'bgr8')
 
         fgmask = self.fgbg.apply(frame)
-        fgmask_morph = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, self.kernel)
+        fgmask = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, self.kernel,iterations=1)
 
-        BG_filtered = CvBridge().cv2_to_imgmsg(fgmask_morph)
+        cc, labels, stat, cent = cv2.connectedComponentsWithStats(fgmask, 4, cv2.CV_32S)
+        print cc
+
+        for ind, i in enumerate(cent):
+            print stat[ind][4]
+            if stat[ind][4] < 200:
+                cv2.circle(fgmask,(int(i[0]),int(i[1])),20,np.array([200,10,200]),2)
+
+
+        BG_filtered = CvBridge().cv2_to_imgmsg(fgmask)
 
         self.image_pub.publish(BG_filtered)
 #        cv2.imshow('frame',fgmask_morph)
