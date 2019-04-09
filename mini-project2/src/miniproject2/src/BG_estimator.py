@@ -58,11 +58,11 @@ class BackGroundFilter:
         #self.image_pubPers.publish(self.bridge.cv2_to_imgmsg(frame1, "bgr8"))
 
         #frm = frame[self.upperleft[1]:self.buttomright[1],self.upperleft[0]:self.buttomright[0]]
-        frm = frame[:, self.roi[0]:self.roi[2]]
+        #frm = frame[:, self.roi[0]:self.roi[2]]
 #        frm = frame[self.roi[1]:self.roi[3], self.roi[0]:self.roi[2]]
 
 
-        fgmask = self.fgbg.apply(frm)
+        fgmask = self.fgbg.apply(frame)
         fgmask = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, self.kernel,iterations=2)
         fgmask = cv2.morphologyEx(fgmask,cv2.MORPH_DILATE,self.kernel,iterations=2)
 
@@ -79,6 +79,7 @@ class BackGroundFilter:
                 if i[:].any() != j[:].any():
                     break
 
+        #print np.shape(fgmask)
         BG_filtered = CvBridge().cv2_to_imgmsg(fgmask)
 
         self.image_pub.publish(BG_filtered)
