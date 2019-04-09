@@ -9,8 +9,8 @@ class MeanShift:
         self.term_crit = ( cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 1 )
         self.track_window = roi #c,r,w,h
 
-    def update():
-        ret, self.track_window = cv.meanShift(dst, self.track_window, self.term_crit)
+    def update(img):
+        ret, self.track_window = cv2.meanShift(img, self.track_window, self.term_crit)
 
 
 class MSros:
@@ -49,7 +49,7 @@ class MSros:
 
         #update all the cars in the mean shift array
         for obj in self.MsArray:
-            obj.update()
+            obj.update(img)
 
 if __name__ == '__main__':
         print("Launching Mean shift algorithm")
