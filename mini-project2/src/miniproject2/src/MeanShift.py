@@ -6,7 +6,7 @@ from cv_bridge import CvBridge
 
 class MeanShift:
     def __init__(self, roi):
-        self.term_crit = ( cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_COUNT, 10, 1 )
+        self.term_crit = ( cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 1 )
         self.track_window = roi #c,r,w,h
 
     def update():
@@ -22,12 +22,12 @@ class MSros:
 
 
     def callback(self, img):
-        x, y, w, h = 5, 5, 5, 5
+        x, y, w, h = 644, 278, 48, 9
         ROItop = img[y:y+h, x:x+w]
-        x, y = 2000, 2000
+        x, y, w, h = 990, 1034, 74, 23
         ROIbot = img[y:y+h, x:x+w]
 
-        thrs = 10
+        thrs = 25
 
         #check if a car is entering at the top
         roisum = 0
@@ -35,7 +35,7 @@ class MSros:
             for y in range(h):
                 roisum += ROItop[x,y]
         if roisum > thrs:
-            ms = MeanShift()
+            ms = MeanShift(ROItop)
             self.MsArray.append(ms)
 
         #Check if a car is entering at the bottom
@@ -44,7 +44,7 @@ class MSros:
             for y in range(h):
                 roisum += ROIbot[x,y]
         if roisum > thrs:
-            ms = MeanShift()
+            ms = MeanShift(ROIbot)
             self.MsArray.append(ms)
 
         #update all the cars in the mean shift array
