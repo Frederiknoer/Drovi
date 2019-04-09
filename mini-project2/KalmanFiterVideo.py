@@ -66,7 +66,7 @@ class KFros:
     def __init__(self):
         rospy.init_node('KF', anonymous=True)
         self.image_sub = rospy.Subscriber("Image_BG_filtered", data, self.callback)
-        self.image_pub = rospy.Publisher("KF_position_estimate", self.KF_array, queue_size=10)
+        #self.image_pub = rospy.Publisher("KF_position_estimate", self.KF_array, queue_size=10)
         self.KF_array = KfArray()
 
     def callback(self, data):
