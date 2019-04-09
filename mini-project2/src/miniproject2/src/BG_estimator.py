@@ -6,8 +6,25 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 
 
-#def callback(data):
-    #rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
+class Car:
+    def __init__(self,x,y,frame):
+        self.pos = np.array('I',[x,y])
+        self.timestamp = rospy.rostime.get_rostime()
+        # avg color ?
+        self.term_crit = (cv2.TERM_CRITERIA_COUNT, 10)
+        #self.roi = np.array("I",[x-20,y-20,x+20,y+20])
+
+        self.roi = frame[y-20:y+20, x-20:x + 20]
+        hsv_roi = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        mask = cv2.inRange(hsv_roi, np.array((0., 60., 32.)), np.array((180., 255., 255.)))
+        roi_hist = cv2.calcHist([hsv_roi], [0], mask, [180], [0, 180])
+
+
+    def update_pos(self,frame):
+        cv2.calcBackProject(frame,[0],roi_hist,[0,180],1)
+
+
+
 
 
 class BackGroundFilter:
@@ -17,7 +34,7 @@ class BackGroundFilter:
         self.image_pub = rospy.Publisher("Image_BG_filtered", Image, queue_size=10)
         self.image_sub = rospy.Subscriber("analyzed_image", Image, self.callback)
         self.bridge = CvBridge()
-        self.roi = np.array([1920/2-400,100,1920/2+50,1000])
+        self.roi = np.array([1920/2-400,100,1920/2+100,1000])
         self.upperleft = np.array([47,187])
         self.buttomright = np.array([210,867])
         # calculate H
