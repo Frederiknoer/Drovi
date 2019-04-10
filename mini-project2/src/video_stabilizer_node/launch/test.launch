@@ -4,13 +4,13 @@
     <arg name="fps" value="10" />
     <arg name="video_stream_provider" value="$(find video_stabilizer_node)/data/2017_06_23_dyrskuepladsen.mp4" /> 
   </include>
-  <node name="image_view" pkg="rqt_image_view" type="rqt_image_view" args="image:=/data_provider/image_raw" />
+  <!--<node name="image_view" pkg="rqt_image_view" type="rqt_image_view" args="image:=/data_provider/image_raw" />-->
   <node name="stabilizer" pkg="video_stabilizer_node" type="stabilizer.py"
   output="screen">
     <remap from="image_raw" to="/data_provider/image_raw" />
   </node>
-  <node name="rqt_graph" pkg="rqt_graph" type="rqt_graph" />
-  <node name="image_view_analyzed_image" pkg="rqt_image_view" type="rqt_image_view" args="image:=/analyzed_image" />
+  <!--<node name="rqt_graph" pkg="rqt_graph" type="rqt_graph" />
+  <node name="image_view_analyzed_image" pkg="rqt_image_view" type="rqt_image_view" args="image:=/analyzed_image" />-->
 <!-- 
 -->
 </launch>

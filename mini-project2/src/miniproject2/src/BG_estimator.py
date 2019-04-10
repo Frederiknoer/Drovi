@@ -4,24 +4,45 @@ import cv2
 import numpy as np
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
+from miniproject2.msg import Car, Cars
 
 
-class Car:
-    def __init__(self,x,y,frame):
-        self.pos = np.array('I',[x,y])
+class Tracker:
+    def __init__(self,frame,x,y,id):
+        self.car = Car()
+        self.car.id = id
+        self.car.x = x
+        self.car.y = y
+
+        self.pos = np.array([x,y])
         self.timestamp = rospy.rostime.get_rostime()
         # avg color ?
-        self.term_crit = (cv2.TERM_CRITERIA_COUNT, 10)
+        self.term_crit = (cv2.TERM_CRITERIA_COUNT, 10,1)
         #self.roi = np.array("I",[x-20,y-20,x+20,y+20])
 
-        self.roi = frame[y-20:y+20, x-20:x + 20]
-        hsv_roi = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        mask = cv2.inRange(hsv_roi, np.array((0., 60., 32.)), np.array((180., 255., 255.)))
-        roi_hist = cv2.calcHist([hsv_roi], [0], mask, [180], [0, 180])
+        #self.roi = frame[y-20:y+20 , x-20:x+20]
+        self.track_window = (int(x-20),int(y-20),int(40),int(40))
+
+        #hsv_roi = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        #mask = cv2.inRange(hsv_roi, np.array((0., 60., 32.)), np.array((180., 255., 255.)))
+        #roi_hist = cv2.calcHist([hsv_roi], [0], mask, [180], [0, 180])
 
 
     def update_pos(self,frame):
-        cv2.calcBackProject(frame,[0],roi_hist,[0,180],1)
+#        cv2.calcBackProject(frame,[0],roi_hist,[0,180],1)
+        if self.isEmpty(frame):
+            return False
+        else:
+            ret, self.track_window = cv2.meanShift(frame, self.track_window, self.term_crit)
+            self.car.x = self.track_window[0] + 20
+            self.car.y = self.track_window[1] + 20
+            self.car.roi = self.track_window
+        return True
+
+    def isEmpty(self, img):
+        roi = img[int(self.track_window[1]):int(self.track_window[1]) + int(self.track_window[3]), int(self.track_window[0]):int(self.track_window[0]) + int(self.track_window[2])]
+        #print (int(self.track_window[1]),int(self.track_window[1]) + int(self.track_window[3]), int(self.track_window[0]),int(self.track_window[0]) + int(self.track_window[2]))
+        return cv2.sumElems(roi)[0] < 1000.0
 
 
 
@@ -31,8 +52,11 @@ class BackGroundFilter:
     def __init__(self):
         rospy.init_node('BG_estimator', anonymous=True)
 
-        self.image_pub = rospy.Publisher("Image_BG_filtered", Image, queue_size=10)
-        self.image_sub = rospy.Subscriber("analyzed_image", Image, self.callback)
+
+        self.track_list = []
+
+        self.nextid = 0
+
         self.bridge = CvBridge()
         self.roi = np.array([1920/2-400,100,1920/2+100,1000])
         self.upperleft = np.array([47,187])
@@ -41,13 +65,17 @@ class BackGroundFilter:
         pIn = np.array([[543, 559], [1173, 127], [1735, 271], [478, 900]], np.float32)  # Pic coordinates
         pOut = np.array([[75, 703], [410, 113], [579, 479], [79, 872]], np.float32)  # meters real world
         self.H = cv2.getPerspectiveTransform(pIn, pOut)
-        self.image_pubPers = rospy.Publisher("Image_Perspect_filtered", Image, queue_size=10)
+        #self.image_pubPers = rospy.Publisher("Image_Perspect_filtered", Image, queue_size=10)
 
 
         self.fgbg = cv2.createBackgroundSubtractorMOG2(detectShadows=False)
         self.kernel = np.ones((3,3),np.uint8)
         self.kernel2 = np.ones((5,5), np.uint8)
         self.lowerdetector = np.array([800,1920/2-400,1920/2+100])
+
+        self.image_pub = rospy.Publisher("Image_BG_filtered", Image, queue_size=10)
+        self.image_sub = rospy.Subscriber("analyzed_image", Image, self.callback)
+        self.car_pub = rospy.Publisher("Cars_list",Cars,queue_size=10)
 
     def changeKernel(self,data):
         self.kernel = np.ones((data,data),np.uint8)
@@ -60,7 +88,9 @@ class BackGroundFilter:
         #frm = frame[self.upperleft[1]:self.buttomright[1],self.upperleft[0]:self.buttomright[0]]
         #frm = frame[:, self.roi[0]:self.roi[2]]
 #        frm = frame[self.roi[1]:self.roi[3], self.roi[0]:self.roi[2]]
+       # bottomDetector = frame[1050,900:1100]
 
+        listOfCars = []
 
         fgmask = self.fgbg.apply(frame)
         fgmask = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, self.kernel,iterations=2)
@@ -69,24 +99,35 @@ class BackGroundFilter:
         cc, labels, stat, cent = cv2.connectedComponentsWithStats(fgmask, 4, cv2.CV_32S)
         #print cc
 
+
+        for i in cent:
+            if (i[1] > 1049 and i[1] < 1051 and i[0] > 900 and i[0] < 1100) or (i[1] > 249 and i[1] < 251 and i[0] > 620 and i[0] < 720):
+                self.track_list.append(Tracker(fgmask,i[0],i[1],self.nextid))
+                self.nextid += 1
+
         for ind, i in enumerate(cent):
             #print stat[ind][4]
             if stat[ind][4] < 2000 and stat[ind][4]>5:
                 cv2.circle(fgmask,(int(i[0]),int(i[1])),20,np.array([200,10,200]),2)
 
-        for i in cent:
-            for j in cent:
-                if i[:].any() != j[:].any():
-                    break
-
         #print np.shape(fgmask)
         BG_filtered = CvBridge().cv2_to_imgmsg(fgmask)
 
+
+
+        for obj in self.track_list:
+            if not obj.update_pos(fgmask):
+                self.track_list.remove(obj)
+            else:
+                listOfCars.append(obj.car)
+
+
+        self.car_pub.publish(listOfCars)
         self.image_pub.publish(BG_filtered)
 #        cv2.imshow('frame',fgmask_morph)
 #        k = cv2.waitKey(30) & 0xff
-        ld = frame[self.lowerdetector[0],self.lowerdetector[1]:self.lowerdetector[2], :]  # self.lowerdetector[1]:self.lowerdetector[2]]
-        self.image_pubPers.publish(self.bridge.cv2_to_imgmsg(ld))
+#         ld = frame[self.lowerdetector[0],self.lowerdetector[1]:self.lowerdetector[2], :]  # self.lowerdetector[1]:self.lowerdetector[2]]
+#         self.image_pubPers.publish(self.bridge.cv2_to_imgmsg(ld))
 
 
 if __name__ == '__main__':
