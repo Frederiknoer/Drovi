@@ -114,7 +114,7 @@ class BackGroundFilter:
         listOfCars = []
 
         fgmask = self.fgbg.apply(frame)
-        fgmask = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, self.kernel,iterations=2)
+        fgmask = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, self.kernel,iterations=1)
         fgmask = cv2.morphologyEx(fgmask,cv2.MORPH_DILATE,self.kernel,iterations=2)
 
         cc, labels, stat, cent = cv2.connectedComponentsWithStats(fgmask, 4, cv2.CV_32S)
@@ -122,7 +122,7 @@ class BackGroundFilter:
 
 
         for i in cent:
-            if (i[1] > 1045 and i[1] < 1055 and i[0] > 900 and i[0] < 1100):
+            if (i[1] > 1000 and i[1] < 1010 and i[0] > 950 and i[0] < 1100):
                 self.track_list.append(Tracker(fgmask,i[0],i[1],self.BOTid))
                 self.BOTid += 2
             elif (i[1] > 245 and i[1] < 255 and i[0] > 620 and i[0] < 720):
@@ -164,9 +164,3 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print("Shutting down")
     cv2.destroyAllWindows()
-
-
-
-
-
-
