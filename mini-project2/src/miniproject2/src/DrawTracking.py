@@ -54,6 +54,11 @@ class DrawTracking:
         radius = 12
         thickness = 2
 
+        minutes = "23:"
+        seconds = "59:"
+        m_seconds = "59"
+        time = minutes + seconds + m_seconds
+        cv2.putText(frame, time,(75, 75), font, fontScale=5, color=np.array([0,0,255]), thickness=5)
 
         for car in self.car_list:
             cv2.circle(frame, (car.x, car.y), radius, colour, thickness)
