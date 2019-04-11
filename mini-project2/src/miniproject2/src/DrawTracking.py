@@ -15,7 +15,7 @@ class DrawTracking:
         self.image_pub = rospy.Publisher("Image_draw_tracking", Image, queue_size=10)
 
         self.image_sub = rospy.Subscriber("analyzed_image", Image, self.callback_img)
-        self.tracking_sub_kf = rospy.Subscriber("Cars_list", Cars, self.callback)
+        self.tracking_sub_kf = rospy.Subscriber("KF_list", Cars, self.callback)
         self.tracking_sub_kf_proj = rospy.Subscriber("KF_list_proj", Cars, self.callback_vel)
 
         self.bridge = CvBridge()
