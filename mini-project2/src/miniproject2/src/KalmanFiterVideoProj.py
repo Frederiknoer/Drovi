@@ -67,7 +67,7 @@ class KfArray:
 class KFros:
     def __init__(self):
         rospy.init_node('KF', anonymous=True)
-        self.car_sub = rospy.Subscriber("Cars_list", Cars, self.callback)
+        self.car_sub = rospy.Subscriber("Cars_list_proj", Cars, self.callback)
         self.KF_pub = rospy.Publisher("KF_list", Cars, queue_size=10)
         self.KF_array = KfArray()
         self.car_array_pub = []
