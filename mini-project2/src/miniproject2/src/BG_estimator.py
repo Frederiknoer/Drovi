@@ -44,8 +44,19 @@ class Tracker:
         #print (int(self.track_window[1]),int(self.track_window[1]) + int(self.track_window[3]), int(self.track_window[0]),int(self.track_window[0]) + int(self.track_window[2]))
         return cv2.sumElems(roi)[0] < 1000.0
 
+    def isUnique(self,arr):
+        count = 0
+        for obj in arr:
+            if(count > 1):
+                return False
+            if self == obj:
+                print self.track_window, "   :   ", obj.track_window
+                count += 1
+        return True
 
-
+    def __eq__(self, other):
+        #print np.array(self.track_window), "   :    ", np.array(other.track_window[:])
+        return self.track_window[0] == other.track_window[0] and self.track_window[1] == other.track_window[1]
 
 
 class BackGroundFilter:
@@ -55,7 +66,8 @@ class BackGroundFilter:
 
         self.track_list = []
 
-        self.nextid = 0
+        self.TOPid = 0
+        self.BOTid = 1
 
         self.bridge = CvBridge()
         self.roi = np.array([1920/2-400,100,1920/2+100,1000])
@@ -102,9 +114,12 @@ class BackGroundFilter:
 
 
         for i in cent:
-            if (i[1] > 1049 and i[1] < 1051 and i[0] > 900 and i[0] < 1100) or (i[1] > 249 and i[1] < 251 and i[0] > 620 and i[0] < 720):
-                self.track_list.append(Tracker(fgmask,i[0],i[1],self.nextid))
-                self.nextid += 1
+            if (i[1] > 1045 and i[1] < 1055 and i[0] > 900 and i[0] < 1100):
+                self.track_list.append(Tracker(fgmask,i[0],i[1],self.BOTid))
+                self.BOTid += 2
+            elif (i[1] > 245 and i[1] < 255 and i[0] > 620 and i[0] < 720):
+                self.track_list.append(Tracker(fgmask, i[0], i[1], self.TOPid))
+                self.TOPid += 2
 
         # for ind, i in enumerate(cent):
         #     #print stat[ind][4]
@@ -116,7 +131,10 @@ class BackGroundFilter:
 
 
         for obj in self.track_list:
-            if not obj.update_pos(fgmask):
+            if not obj.isUnique(self.track_list):
+                #print obj.track_window
+                self.track_list.remove(obj)
+            elif not obj.update_pos(fgmask):
                 self.track_list.remove(obj)
             else:
                 listOfCars.append(obj.car)
