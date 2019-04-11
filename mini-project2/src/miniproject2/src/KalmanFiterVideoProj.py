@@ -63,8 +63,8 @@ class KfArray:
     def arrayPredict(self):
         for elem in self.arr:
             elem.KalmanPrediction()
-            #if elem.y_pos < 1:
-               # self.arr.remove(elem)
+            if elem.y_pos < 1 or elem.y_pos > 999:
+                self.arr.remove(elem)
 
 class KFros:
     def __init__(self):
@@ -88,7 +88,7 @@ class KFros:
             msg.id = car.ID
             msg.x = int(car.x_pos)
             msg.y = int(car.y_pos)
-            msg.vel = car.speed
+            msg.vel = car.speed * 0.504
             self.car_array_pub.append(msg)
 
         self.KF_pub.publish(self.car_array_pub)
