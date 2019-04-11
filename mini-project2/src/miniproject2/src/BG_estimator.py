@@ -3,6 +3,7 @@ import rospy
 import cv2
 import numpy as np
 from sensor_msgs.msg import Image
+from std_msgs.msg import Header
 from cv_bridge import CvBridge
 from miniproject2.msg import Car, Cars
 
@@ -66,6 +67,8 @@ class BackGroundFilter:
 
         self.track_list = []
 
+        self.startTime = rospy.get_rostime()
+
         self.TOPid = 0
         self.BOTid = 1
 
@@ -78,7 +81,7 @@ class BackGroundFilter:
         pOut = np.array([[75, 703], [410, 113], [579, 479], [79, 872]], np.float32)  # meters real world
         self.H = cv2.getPerspectiveTransform(pIn, pOut)
 
-        self.image_pubPers = rospy.Publisher("Image_Perspect_filtered", Image, queue_size=10)
+        self.image_pubPers = rospy.Publisher("Image_original", Image, queue_size=10)
 
 
         self.fgbg = cv2.createBackgroundSubtractorMOG2(detectShadows=False)
@@ -87,17 +90,20 @@ class BackGroundFilter:
         self.lowerdetector = np.array([800,1920/2-400,1920/2+100])
 
         self.image_pub = rospy.Publisher("Image_BG_filtered", Image, queue_size=10)
-        self.image_sub = rospy.Subscriber("analyzed_image", Image, self.callback)
         self.car_pub = rospy.Publisher("Cars_list",Cars,queue_size=10)
+        self.image_sub = rospy.Subscriber("analyzed_image", Image, self.callback)
 
     def changeKernel(self,data):
         self.kernel = np.ones((data,data),np.uint8)
 
     def callback(self, data):
-        header = data.header
+        header = Header()
+        header.stamp = rospy.get_rostime() # - self.startTime
+        data.header = header
         frame = CvBridge().imgmsg_to_cv2(data,'bgr8')
-        frame1 = warp = cv2.warpPerspective(frame, self.H, (579, 1000))#[self.upperleft[1]:self.buttomright[1],self.upperleft[0]:self.buttomright[0]]
-        self.image_pubPers.publish(self.bridge.cv2_to_imgmsg(frame1, "bgr8"))
+        self.image_pubPers.publish(data)
+        #frame1 = warp = cv2.warpPerspective(frame, self.H, (579, 1000))#[self.upperleft[1]:self.buttomright[1],self.upperleft[0]:self.buttomright[0]]
+        #self.image_pubPers.publish(self.bridge.cv2_to_imgmsg(frame1, "bgr8"))
         #print np.shape(warp),"\n", warp
 
         #frm = frame[self.upperleft[1]:self.buttomright[1],self.upperleft[0]:self.buttomright[0]]

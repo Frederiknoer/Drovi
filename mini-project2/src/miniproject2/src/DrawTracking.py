@@ -13,14 +13,14 @@ class DrawTracking:
     def __init__(self):
         rospy.init_node('Draw_Tracking', anonymous=True)
 
-        self.image_pub = rospy.Publisher("Image_draw_tracking", Image, queue_size=1)
+        self.image_pub = rospy.Publisher("Image_draw_tracking", Image, queue_size=5)
 
         #self.image_sub = rospy.Subscriber("analyzed_image", Image, self.callback)
         #self.tracking_sub_kf = rospy.Subscriber("KF_list", Cars, self.callback_pos)
         #self.tracking_sub_kf_proj = rospy.Subscriber("KF_list_proj", Cars, self.callback_vel)
 
 
-        self.image_sub = message_filters.Subscriber("analyzed_image", Image)
+        self.image_sub = message_filters.Subscriber("Image_original", Image)
         self.tracking_sub_kf = message_filters.Subscriber("KF_list", Cars)
         self.tracking_sub_kf_proj = message_filters.Subscriber("KF_list_proj", Cars)
         self.synchronizer = message_filters.TimeSynchronizer([self.image_sub,self.tracking_sub_kf,self.tracking_sub_kf_proj],10)
@@ -41,7 +41,8 @@ class DrawTracking:
         self.car_list_vel = data.listOfCars
 
     def callback(self, img,data,data_proj):
-        frame = CvBridge().imgmsg_to_cv2(img)
+        print img.header.stamp, data.header.stamp, data_proj.header.stamp
+        frame = CvBridge().imgmsg_to_cv2(img,'bgr8')
         self.car_list = data.listOfCars
         self.car_list_vel = data_proj.listOfCars
 
