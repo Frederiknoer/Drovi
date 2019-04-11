@@ -17,12 +17,14 @@ class Projection:
 
         self.car_pub = rospy.Publisher("Cars_list_proj",Cars,queue_size=10)
         self.car_sub = rospy.Subscriber("Cars_list",Cars,self.callback)
-        #self.image_sub = rospy.Subscriber("Image_Perspect_filtered",Image,self.callback_image)
-        #self.image_pub = rospy.Publisher("Image_perspect_test",Image,queue_size=10)
+        self.image_sub = rospy.Subscriber("Image_original",Image,self.callback_image)
+        self.image_pub = rospy.Publisher("Image_perspect_test",Image,queue_size=10)
         self.frame = np.array([])
 
     def callback_image(self,data):
         self.frame = CvBridge().imgmsg_to_cv2(data, 'bgr8')
+        frame1 = cv2.warpPerspective(self.frame, self.H, (579, 1000))#[self.upperleft[1]:self.buttomright[1],self.upperleft[0]:self.buttomright[0]]
+        self.image_pub.publish(CvBridge().cv2_to_imgmsg(frame1, "bgr8"))
 
 
     def callback(self,data):
