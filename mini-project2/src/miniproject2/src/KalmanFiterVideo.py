@@ -50,7 +50,7 @@ class KfArray:
 
     def CheckID(self, ID, x_pos, y_pos):
         itemExists = 0
-        for elem in arr:
+        for elem in self.arr:
             if elem.ID == ID:
                 itemExists += 1
                 elem.updateValues(x_pos, y_pos)

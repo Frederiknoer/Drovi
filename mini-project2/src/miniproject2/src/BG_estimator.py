@@ -65,7 +65,7 @@ class BackGroundFilter:
         pIn = np.array([[543, 559], [1173, 127], [1735, 271], [478, 900]], np.float32)  # Pic coordinates
         pOut = np.array([[75, 703], [410, 113], [579, 479], [79, 872]], np.float32)  # meters real world
         self.H = cv2.getPerspectiveTransform(pIn, pOut)
-        print self.H
+
         #self.image_pubPers = rospy.Publisher("Image_Perspect_filtered", Image, queue_size=10)
 
 
@@ -105,10 +105,10 @@ class BackGroundFilter:
                 self.track_list.append(Tracker(fgmask,i[0],i[1],self.nextid))
                 self.nextid += 1
 
-        for ind, i in enumerate(cent):
-            #print stat[ind][4]
-            if stat[ind][4] < 2000 and stat[ind][4]>5:
-                cv2.circle(fgmask,(int(i[0]),int(i[1])),20,np.array([200,10,200]),2)
+        # for ind, i in enumerate(cent):
+        #     #print stat[ind][4]
+        #     if stat[ind][4] < 2000 and stat[ind][4]>5:
+        #         cv2.circle(fgmask,(int(i[0]),int(i[1])),20,np.array([200,10,200]),2)
 
         BG_filtered = CvBridge().cv2_to_imgmsg(fgmask)
 
