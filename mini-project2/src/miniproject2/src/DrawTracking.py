@@ -8,6 +8,7 @@ from cv_bridge import CvBridge
 from miniproject2.msg import Car, Cars
 import random
 import message_filters
+import math
 
 class DrawTracking:
     def __init__(self):
@@ -30,6 +31,12 @@ class DrawTracking:
         self.bridge = CvBridge()
         self.car_list = []
         self.car_list_vel = []
+        self.sec_dt = 0.0
+        self.sec_prev_t = 0.0
+        self.ns_dt = 0.0
+        self.ns_prev_t = 0.0
+
+        self.dt = 0.0
         #self.frame = np.zeros((1080,1920,3), np.uint8)
 
     def callback_pos(self, data):
@@ -49,15 +56,26 @@ class DrawTracking:
         #print("Data income")
         font = cv2.FONT_HERSHEY_PLAIN
         even_x = 0
-        odd_x = 1800
+        odd_x = 1700
         colour = np.array([255,255,255])
         txt_scale = 2
         radius = 12
         thickness = 2
 
-        minutes = "23:"
-        seconds = "59:"
-        m_seconds = "59"
+        seconds = str((img.header.stamp.secs % 60))
+        m_seconds = ":" + str(int(img.header.stamp.nsecs/math.pow(10,6)))
+        minutes = str( int(img.header.stamp.secs/60) ) + ":"
+
+        self.sec_dt = (img.header.stamp.secs - self.sec_prev_t)
+        self.sec_prev_t = img.header.stamp.secs
+        self.ns_dt = (img.header.stamp.nsecs - self.ns_prev_t)
+        self.ns_prev_t = img.header.stamp.nsecs
+
+        self.dt = (self.sec_dt) + (self.ns_dt/(math.pow(10,9)))
+
+
+        print(self.dt)
+
         time = minutes + seconds + m_seconds
         cv2.putText(frame, time,(75, 75), font, fontScale=5, color=np.array([0,0,255]), thickness=5)
 
@@ -69,7 +87,7 @@ class DrawTracking:
             #print(len(self.car_list_vel))
             for vel_car in self.car_list_vel:
                 if vel_car.id == car.id:
-                    imgtext2 = "Vel: " + str(vel_car.vel)
+                    imgtext2 = "Vel: " + str((vel_car.vel/self.dt)*3.6)
                     break
 
             if car.id % 2 == 0: #even
