@@ -134,6 +134,9 @@ class BackGroundFilter:
         #     if stat[ind][4] < 2000 and stat[ind][4]>5:
         #         cv2.circle(fgmask,(int(i[0]),int(i[1])),20,np.array([200,10,200]),2)
 
+        for obj in self.track_list:
+            cv2.rectangle(fgmask,(obj.car.roi[0],obj.car.roi[1]),(obj.car.roi[0]+obj.car.roi[2],obj.car.roi[1]+obj.car.roi[3]),127,thickness=4)
+
         BG_filtered = CvBridge().cv2_to_imgmsg(fgmask)
 
 
