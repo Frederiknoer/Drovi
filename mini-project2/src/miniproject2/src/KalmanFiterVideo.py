@@ -73,6 +73,7 @@ class KFros:
         self.car_array_pub = []
 
     def callback(self, data):
+        print(len(self.KF_array.arr))
         if len(self.KF_array.arr) > 0:
             self.KF_array.arrayPredict()
         carlist = data.listOfCars
