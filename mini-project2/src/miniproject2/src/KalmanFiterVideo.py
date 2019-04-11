@@ -38,7 +38,7 @@ class KalmanFilterVideo:
     def KalmanPrediction(self):
         self.KF.predict()
         self.x_pos = self.KF.x[0]
-        self.y_pos = self.KF.y[2]
+        self.y_pos = self.KF.x[2]
 
     def updateValues(self, new_x_pos, new_y_pos):
         self.KF.update([[new_x_pos], [new_y_pos]])
@@ -59,8 +59,10 @@ class KfArray:
             self.arr.append(KF)
 
     def arrayPredict(self):
-        for elem in arr:
+        for elem in self.arr:
             elem.KalmanPrediction()
+            if elem.y_pos < 200 or elem.y_pos > 1045:
+                self.arr.remove(elem)
 
 class KFros:
     def __init__(self):
@@ -71,18 +73,19 @@ class KFros:
         self.car_array_pub = []
 
     def callback(self, data):
-        self.KF_array.arrayPredict()
+        if len(self.KF_array.arr) > 0:
+            self.KF_array.arrayPredict()
         carlist = data.listOfCars
 
-        if len(carlist) > 0
+        if len(carlist) > 0:
             for car in carlist:
                 self.KF_array.CheckID(car.id, car.x, car.y)
 
         for car in self.KF_array.arr:
             msg = Car()
             msg.id = car.ID
-            msg.x = car.x_pos
-            msg.y = car.y_pos
+            msg.x = int(car.x_pos)
+            msg.y = int(car.y_pos)
             msg.vel = car.speed
             self.car_array_pub.append(msg)
 
