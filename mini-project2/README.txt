@@ -10,7 +10,9 @@ OBS! You need to source the ROS framework whenever you open a new terminal
 
 to run the videostream and stabilizer: 
 	roslaunch video_stabilizer_node test.launch 
-	rosrun miniproject2 "insert python file here"
+	roslaunch miniproject2 test.launch
+
+Video output can be seen with rqt_image_view
 
 To create a new ros node, simply create a python file and rebuild the catkin workspace
 
