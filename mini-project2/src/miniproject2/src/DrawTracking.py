@@ -6,62 +6,77 @@ from sensor_msgs.msg import Image
 from std_msgs.msg import Int16MultiArray
 from cv_bridge import CvBridge
 from miniproject2.msg import Car, Cars
+import random
 
 class DrawTracking:
     def __init__(self):
         rospy.init_node('Draw_Tracking', anonymous=True)
 
         self.image_pub = rospy.Publisher("Image_draw_tracking", Image, queue_size=10)
-        self.image_sub = rospy.Subscriber("analyzed_image", Image, self.callback)
-        #self.tracking_sub = rospy.Subscriber("MsArray", Int16MultiArray, self.callback_track)
-        self.tracking_sub = rospy.Subscriber("Cars_list", Cars, self.callback_track)
+
+        self.image_sub = rospy.Subscriber("analyzed_image", Image, self.callback_img)
+        self.tracking_sub_kf = rospy.Subscriber("KF_list", Cars, self.callback)
+        self.tracking_sub_kf_proj = rospy.Subscriber("KF_list_proj", Cars, self.callback_vel)
+
         self.bridge = CvBridge()
         self.car_list = []
+        self.car_list_vel = []
+        self.frame = np.zeros((1920,1080,3), np.uint8)
 
-    def callback_track(self, data):
-        self.car_list = data.listOfCars
+    def callback_img(self, img):
+        self.frame = np.zeros((1920,1080,3), np.uint8)
+        self.frame = CvBridge().imgmsg_to_cv2(img)
+        #print("img income")
 
+    def callback_vel(self, data):
+        self.car_list_vel = data.listOfCars
 
     def callback(self, data):
-        frame = CvBridge().imgmsg_to_cv2(data)
+        #print("Data income")
+        font = cv2.FONT_HERSHEY_PLAIN
+        even_x = 1800
+        odd_x = 0
+        colour = (255,255,255)
+        txt_scale = 2
+        radius = 10
 
-        #for i, k in zip(data[0::2], data[1::2]):
-            #print str(i), '+', str(k), '=', str(i + k)
+        self.car_list = data.listOfCars
 
-        #print self.car_list
-
-        # for i in range(0,len(self.car_list[:]),4):
-        #     x = i
-        #     y =i+1
-        #     w = i+2
-        #     h=i+3
-        #     cv2.rectangle(frame, (self.car_list[x], self.car_list[y]), (self.car_list[x] + self.car_list[w], self.car_list[y] + self.car_list[h]), np.array([0,0,255]), 2)
-        #     #cv2.circle(frame,(self.MsArray[i],self.MsArray[i+1]),20,np.array([100,4,100]),5)
         for car in self.car_list:
-            #cv2.rectangle(frame, (car.roi[0], car.roi[1] ,car.roi[0] +car.roi[2],car.roi[1]+car.roi[3]), np.array([0, 0, 255]), 2)
-            #print car.id, "   ",  car.roi
-            cv2.rectangle(frame, car.roi,np.array([0, 0, 255]), 2)
+            #colour = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
+            cv2.circle(self.frame, (car.x, car.y), radius, colour)
 
-        Tracker = CvBridge().cv2_to_imgmsg(frame,'bgr8')
-        #cv2.imshow("test",clone)
+            imgtext1 = "ID: " + str(car.id)
+            imgtext2 = ""
+            for vel_car in self.car_list_vel:
+                if vel_car.id == car.id:
+                    imgtext2 = "Vel: " + str(vel_car.vel)
+                    break
 
-        #cv2.waitKey(0)
-        #print np.shape(clone), "   -   ", np.size(clone)
-        #print np.shape(Tracker), "   -   ", np.size(Tracker)
+            if car.id % 2 == 0: #even
+                pt1 = (car.x + (radius/2), car.y)
+
+                cv2.line(self.frame, pt1,(even_x, car.y), colour)
+                cv2.putText(self.frame, imgtext1,(even_x, car.y), font, txt_scale, colour)
+                cv2.putText(self.frame, imgtext2,(even_x, car.y-40), font, txt_scale, colour)
+
+            elif car.id % 2 == 1: #odd
+                pt1 = (car.x - (radius/2), car.y)
+
+                cv2.line(self.frame, pt1,(odd_x, car.y), colour)
+                cv2.putText(self.frame, imgtext1,(odd_x, car.y), font, txt_scale, colour)
+                cv2.putText(self.frame, imgtext2,(odd_x, car.y-40), font, txt_scale, colour)
+
+
+        Tracker = CvBridge().cv2_to_imgmsg(self.frame,'bgr8')
         self.image_pub.publish(Tracker)
 
 
 if __name__ == '__main__':
-    print("Launching Background removal filter")
+    print("Launching Drawing function")
     DT = DrawTracking()
     try:
         rospy.spin()
     except KeyboardInterrupt:
         print("Shutting down")
     cv2.destroyAllWindows()
-
-
-
-
-
-
