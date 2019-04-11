@@ -14,7 +14,7 @@ class KalmanFilterVideo:
         self.x_pos = x_pos
         self.y_pos = y_pos
         self.speed = 0.0
-        self.dt = 1.0
+        self.dt = 0.1
         self.update_counter = 0
 
         self.KF = KalmanFilter(dim_x=4, dim_z=2)
