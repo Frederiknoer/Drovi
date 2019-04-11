@@ -54,6 +54,8 @@ class KfArray:
             if elem.ID == ID:
                 itemExists += 1
                 elem.updateValues(x_pos, y_pos)
+                print("values updated, speed: ")
+                print(elem.speed)
         if itemExists == 0:
             KF = KalmanFilterVideo(ID=ID, x_pos=x_pos, y_pos=y_pos)
             self.arr.append(KF)
@@ -61,14 +63,14 @@ class KfArray:
     def arrayPredict(self):
         for elem in self.arr:
             elem.KalmanPrediction()
-            if elem.y_pos < 200 or elem.y_pos > 1045:
-                self.arr.remove(elem)
+            #if elem.y_pos < 1:
+               # self.arr.remove(elem)
 
 class KFros:
     def __init__(self):
-        rospy.init_node('KF', anonymous=True)
+        rospy.init_node('KF_proj', anonymous=True)
         self.car_sub = rospy.Subscriber("Cars_list_proj", Cars, self.callback)
-        self.KF_pub = rospy.Publisher("KF_list", Cars, queue_size=10)
+        self.KF_pub = rospy.Publisher("KF_list_proj", Cars, queue_size=10)
         self.KF_array = KfArray()
         self.car_array_pub = []
 
@@ -92,7 +94,7 @@ class KFros:
         self.KF_pub.publish(self.car_array_pub)
 
 if __name__ == '__main__':
-        print("Launching Kalman filter")
+        print("Launching projected Kalman filter")
         kf = KFros()
         try:
             rospy.spin()

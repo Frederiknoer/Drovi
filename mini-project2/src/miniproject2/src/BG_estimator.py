@@ -66,7 +66,7 @@ class BackGroundFilter:
         pOut = np.array([[75, 703], [410, 113], [579, 479], [79, 872]], np.float32)  # meters real world
         self.H = cv2.getPerspectiveTransform(pIn, pOut)
 
-        #self.image_pubPers = rospy.Publisher("Image_Perspect_filtered", Image, queue_size=10)
+        self.image_pubPers = rospy.Publisher("Image_Perspect_filtered", Image, queue_size=10)
 
 
         self.fgbg = cv2.createBackgroundSubtractorMOG2(detectShadows=False)
@@ -83,8 +83,9 @@ class BackGroundFilter:
 
     def callback(self, data):
         frame = CvBridge().imgmsg_to_cv2(data,'bgr8')
-        #frame1 = warp = cv2.warpPerspective(frame, self.H, (579, 872))[self.upperleft[1]:self.buttomright[1],self.upperleft[0]:self.buttomright[0]]
-        #self.image_pubPers.publish(self.bridge.cv2_to_imgmsg(frame1, "bgr8"))
+        frame1 = warp = cv2.warpPerspective(frame, self.H, (579, 1000))#[self.upperleft[1]:self.buttomright[1],self.upperleft[0]:self.buttomright[0]]
+        self.image_pubPers.publish(self.bridge.cv2_to_imgmsg(frame1, "bgr8"))
+        #print np.shape(warp),"\n", warp
 
         #frm = frame[self.upperleft[1]:self.buttomright[1],self.upperleft[0]:self.buttomright[0]]
         #frm = frame[:, self.roi[0]:self.roi[2]]
