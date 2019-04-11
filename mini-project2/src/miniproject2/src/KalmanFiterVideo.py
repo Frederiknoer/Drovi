@@ -66,7 +66,7 @@ class KFros:
     def __init__(self):
         rospy.init_node('KF', anonymous=True)
         self.car_sub = rospy.Subscriber("Cars_list", Cars, self.callback)
-        self.KF_pub = rospy.Publisher("KF_")
+        self.KF_pub = rospy.Publisher("KF_list", Cars, queue_size=10)
         self.KF_array = KfArray()
         self.car_array_pub = []
 
@@ -85,6 +85,8 @@ class KFros:
             msg.y = car.y_pos
             msg.vel = car.speed
             self.car_array_pub.append(msg)
+
+        self.KF_pub.publish(self.car_array_pub)
 
 if __name__ == '__main__':
         print("Launching Kalman filter")
