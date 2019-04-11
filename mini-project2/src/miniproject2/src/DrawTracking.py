@@ -39,7 +39,7 @@ class DrawTracking:
         #     #cv2.circle(frame,(self.MsArray[i],self.MsArray[i+1]),20,np.array([100,4,100]),5)
         for car in self.car_list:
             #cv2.rectangle(frame, (car.roi[0], car.roi[1] ,car.roi[0] +car.roi[2],car.roi[1]+car.roi[3]), np.array([0, 0, 255]), 2)
-            print car.id, "   ",  car.roi
+            #print car.id, "   ",  car.roi
             cv2.rectangle(frame, car.roi,np.array([0, 0, 255]), 2)
 
         Tracker = CvBridge().cv2_to_imgmsg(frame,'bgr8')

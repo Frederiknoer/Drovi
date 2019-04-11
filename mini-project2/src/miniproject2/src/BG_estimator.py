@@ -65,6 +65,7 @@ class BackGroundFilter:
         pIn = np.array([[543, 559], [1173, 127], [1735, 271], [478, 900]], np.float32)  # Pic coordinates
         pOut = np.array([[75, 703], [410, 113], [579, 479], [79, 872]], np.float32)  # meters real world
         self.H = cv2.getPerspectiveTransform(pIn, pOut)
+        print self.H
         #self.image_pubPers = rospy.Publisher("Image_Perspect_filtered", Image, queue_size=10)
 
 
@@ -88,7 +89,6 @@ class BackGroundFilter:
         #frm = frame[self.upperleft[1]:self.buttomright[1],self.upperleft[0]:self.buttomright[0]]
         #frm = frame[:, self.roi[0]:self.roi[2]]
 #        frm = frame[self.roi[1]:self.roi[3], self.roi[0]:self.roi[2]]
-       # bottomDetector = frame[1050,900:1100]
 
         listOfCars = []
 
@@ -110,7 +110,6 @@ class BackGroundFilter:
             if stat[ind][4] < 2000 and stat[ind][4]>5:
                 cv2.circle(fgmask,(int(i[0]),int(i[1])),20,np.array([200,10,200]),2)
 
-        #print np.shape(fgmask)
         BG_filtered = CvBridge().cv2_to_imgmsg(fgmask)
 
 
