@@ -15,7 +15,6 @@ class KalmanFilterVideo:
         self.y_pos = y_pos
         self.speed = 0.0
         self.dt = 1.0
-        self.predict_counter = 0
 
         self.KF = KalmanFilter(dim_x=4, dim_z=2)
         self.KF.x = np.array([0.,0.,0.,0.])
@@ -55,7 +54,8 @@ class KfArray:
             if elem.ID == ID:
                 itemExists += 1
                 elem.updateValues(x_pos, y_pos)
-                elem.predict_counter = 0
+                print("values updated, speed: ")
+                print(elem.speed)
         if itemExists == 0:
             KF = KalmanFilterVideo(ID=ID, x_pos=x_pos, y_pos=y_pos)
             self.arr.append(KF)
@@ -63,12 +63,7 @@ class KfArray:
     def arrayPredict(self):
         for elem in self.arr:
             elem.KalmanPrediction()
-            elem.predict_counter += 1
-            if elem.predict_counter > 15:
-                self.arr.remove(elem)
-            elif elem.y_pos < 1 or elem.y_pos > 999:
-                self.arr.remove(elem)
-            elif elem.x_pos < 1 or elem.x_pos > 590:
+            if elem.y_pos < 1 or elem.y_pos > 999:
                 self.arr.remove(elem)
 
 class KFros:
