@@ -15,27 +15,27 @@ class DrawTracking:
         self.image_pub = rospy.Publisher("Image_draw_tracking", Image, queue_size=10)
 
         self.image_sub = rospy.Subscriber("analyzed_image", Image, self.callback_img)
-        self.tracking_sub_kf = rospy.Subscriber("KF_list", Cars, self.callback)
+        self.tracking_sub_kf = rospy.Subscriber("Cars_list", Cars, self.callback)
         self.tracking_sub_kf_proj = rospy.Subscriber("KF_list_proj", Cars, self.callback_vel)
 
         self.bridge = CvBridge()
         self.car_list = []
         self.car_list_vel = []
-        self.frame = np.zeros((1920,1080,3), np.uint8)
+        self.frame = np.zeros((1080,1920,3), np.uint8)
 
     def callback_img(self, img):
-        self.frame = np.zeros((1920,1080,3), np.uint8)
         self.frame = CvBridge().imgmsg_to_cv2(img)
         #print("img income")
 
     def callback_vel(self, data):
+        print("test")
         self.car_list_vel = data.listOfCars
 
     def callback(self, data):
         #print("Data income")
         font = cv2.FONT_HERSHEY_PLAIN
-        even_x = 1800
-        odd_x = 0
+        even_x = 0
+        odd_x = 1800
         colour = (255,255,255)
         txt_scale = 2
         radius = 10
@@ -47,25 +47,26 @@ class DrawTracking:
             cv2.circle(self.frame, (car.x, car.y), radius, colour)
 
             imgtext1 = "ID: " + str(car.id)
-            imgtext2 = ""
+            imgtext2 = "No Vel"
+            #print(len(self.car_list_vel))
             for vel_car in self.car_list_vel:
                 if vel_car.id == car.id:
                     imgtext2 = "Vel: " + str(vel_car.vel)
                     break
 
             if car.id % 2 == 0: #even
-                pt1 = (car.x + (radius/2), car.y)
+                pt1 = (car.x - (radius/2), car.y)
 
                 cv2.line(self.frame, pt1,(even_x, car.y), colour)
                 cv2.putText(self.frame, imgtext1,(even_x, car.y), font, txt_scale, colour)
-                cv2.putText(self.frame, imgtext2,(even_x, car.y-40), font, txt_scale, colour)
+                cv2.putText(self.frame, imgtext2,(even_x, car.y+25), font, txt_scale, colour)
 
             elif car.id % 2 == 1: #odd
-                pt1 = (car.x - (radius/2), car.y)
+                pt1 = (car.x + (radius/2), car.y)
 
                 cv2.line(self.frame, pt1,(odd_x, car.y), colour)
                 cv2.putText(self.frame, imgtext1,(odd_x, car.y), font, txt_scale, colour)
-                cv2.putText(self.frame, imgtext2,(odd_x, car.y-40), font, txt_scale, colour)
+                cv2.putText(self.frame, imgtext2,(odd_x, car.y+25), font, txt_scale, colour)
 
 
         Tracker = CvBridge().cv2_to_imgmsg(self.frame,'bgr8')
