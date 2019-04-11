@@ -15,10 +15,17 @@ class DrawTracking:
 
         self.image_pub = rospy.Publisher("Image_draw_tracking", Image, queue_size=1)
 
-        self.image_sub = rospy.Subscriber("analyzed_image", Image, self.callback)
-        self.tracking_sub_kf = rospy.Subscriber("KF_list", Cars, self.callback_pos)
-        self.tracking_sub_kf_proj = rospy.Subscriber("KF_list_proj", Cars, self.callback_vel)
-        #self.synchronizer = message_filters.TimeSynchronizer([self.image_pub,self.tracking_sub_kf,self.tracking_sub_kf_proj],1)
+        #self.image_sub = rospy.Subscriber("analyzed_image", Image, self.callback)
+        #self.tracking_sub_kf = rospy.Subscriber("KF_list", Cars, self.callback_pos)
+        #self.tracking_sub_kf_proj = rospy.Subscriber("KF_list_proj", Cars, self.callback_vel)
+
+
+        self.image_sub = message_filters.Subscriber("analyzed_image", Image)
+        self.tracking_sub_kf = message_filters.Subscriber("KF_list", Cars)
+        self.tracking_sub_kf_proj = message_filters.Subscriber("KF_list_proj", Cars)
+        self.synchronizer = message_filters.TimeSynchronizer([self.image_sub,self.tracking_sub_kf,self.tracking_sub_kf_proj],10)
+        self.synchronizer.registerCallback(self.callback)
+        #self.synchronizer.registerCallback(self.callback)
 
         self.bridge = CvBridge()
         self.car_list = []
@@ -31,8 +38,10 @@ class DrawTracking:
     def callback_vel(self, data):
         self.car_list_vel = data.listOfCars
 
-    def callback(self, img):
+    def callback(self, img,data,data_proj):
         frame = CvBridge().imgmsg_to_cv2(img)
+        self.car_list = data.listOfCars
+        self.car_list_vel = data_proj.listOfCars
 
         #print("Data income")
         font = cv2.FONT_HERSHEY_PLAIN

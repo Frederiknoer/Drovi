@@ -106,7 +106,7 @@ catkin_package(
 CATKIN_DEPENDS message_runtime
 #  INCLUDE_DIRS include
 #  LIBRARIES miniproject2
-#  CATKIN_DEPENDS rospy std_msgs
+  CATKIN_DEPENDS rospy std_msgs
 #  DEPENDS system_lib
 )
 

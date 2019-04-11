@@ -27,7 +27,7 @@ class Projection:
 
 
     def callback(self,data):
-
+        header = data.header
         for car in data.listOfCars:
             #print self.H, "\n"
             pos = np.array([[car.x],[car.y],[1.0]])
@@ -45,7 +45,7 @@ class Projection:
             cv2.circle(self.frame,(car.x,car.y),20,np.array([200,10,200]),2)
         perspect_image = CvBridge().cv2_to_imgmsg(self.frame,'bgr8')
         self.image_pub.publish(perspect_image)
-        self.car_pub.publish(data.listOfCars)
+        self.car_pub.publish(data)#header=header,listOfCars=data.listOfCars)
 
 
 if __name__ == '__main__':

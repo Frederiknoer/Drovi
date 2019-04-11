@@ -94,6 +94,7 @@ class BackGroundFilter:
         self.kernel = np.ones((data,data),np.uint8)
 
     def callback(self, data):
+        header = data.header
         frame = CvBridge().imgmsg_to_cv2(data,'bgr8')
         frame1 = warp = cv2.warpPerspective(frame, self.H, (579, 1000))#[self.upperleft[1]:self.buttomright[1],self.upperleft[0]:self.buttomright[0]]
         self.image_pubPers.publish(self.bridge.cv2_to_imgmsg(frame1, "bgr8"))
@@ -137,10 +138,10 @@ class BackGroundFilter:
             elif not obj.update_pos(fgmask):
                 self.track_list.remove(obj)
             else:
-                listOfCars.append(obj.car)
+                listOfCars.append((obj.car))
 
 
-        self.car_pub.publish(listOfCars)
+        self.car_pub.publish(header=header,listOfCars=listOfCars)
         self.image_pub.publish(BG_filtered)
 #        cv2.imshow('frame',fgmask_morph)
 #        k = cv2.waitKey(30) & 0xff

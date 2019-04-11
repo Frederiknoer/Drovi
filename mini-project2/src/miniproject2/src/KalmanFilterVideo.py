@@ -80,6 +80,7 @@ class KFros:
         self.car_array_pub = []
 
     def callback(self, data):
+        header = data.header
         print(len(self.KF_array.arr))
         if len(self.KF_array.arr) > 0:
             self.KF_array.arrayPredict()
@@ -98,7 +99,7 @@ class KFros:
             msg.vel = car.speed
             self.car_array_pub.append(msg)
 
-        self.KF_pub.publish(self.car_array_pub)
+        self.KF_pub.publish(header=header,listOfCars=self.car_array_pub)
 
 if __name__ == '__main__':
         print("Launching Kalman filter")
