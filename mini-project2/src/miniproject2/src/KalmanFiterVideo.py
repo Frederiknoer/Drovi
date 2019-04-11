@@ -13,7 +13,7 @@ class KalmanFilterVideo:
         self.ID = ID
         self.x_pos = x_pos
         self.y_pos = y_pos
-        self.speed = 0
+        self.speed = 0.0
         self.dt = 1.0
 
         self.KF = KalmanFilter(dim_x=4, dim_z=2)
@@ -37,6 +37,8 @@ class KalmanFilterVideo:
 
     def KalmanPrediction(self):
         self.KF.predict()
+        self.x_pos = self.KF.x[0]
+        self.y_pos = self.KF.y[2]
 
     def updateValues(self, new_x_pos, new_y_pos):
         self.KF.update([[new_x_pos], [new_y_pos]])
@@ -60,22 +62,29 @@ class KfArray:
         for elem in arr:
             elem.KalmanPrediction()
 
-def drawSquares(img, x, y):
-    cv2.rectangle(img, ((x-3),(y-8)),((x+3),(y+8)))
-
 class KFros:
     def __init__(self):
         rospy.init_node('KF', anonymous=True)
-        self.image_sub = rospy.Subscriber("Image_BG_filtered", data, self.callback)
-        #self.image_pub = rospy.Publisher("KF_position_estimate", self.KF_array, queue_size=10)
+        self.car_sub = rospy.Subscriber("Cars_list", Cars, self.callback)
+        self.KF_pub = rospy.Publisher("KF_")
         self.KF_array = KfArray()
+        self.car_array_pub = []
 
     def callback(self, data):
         self.KF_array.arrayPredict()
-        if len(data) > 1:
-            self.KF_array.CheckID(data[0], data[1], data[2])
+        carlist = data.listOfCars
 
+        if len(carlist) > 0
+            for car in carlist:
+                self.KF_array.CheckID(car.id, car.x, car.y)
 
+        for car in self.KF_array.arr:
+            msg = Car()
+            msg.id = car.ID
+            msg.x = car.x_pos
+            msg.y = car.y_pos
+            msg.vel = car.speed
+            self.car_array_pub.append(msg)
 
 if __name__ == '__main__':
         print("Launching Kalman filter")
