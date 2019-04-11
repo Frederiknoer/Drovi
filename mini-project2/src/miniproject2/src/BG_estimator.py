@@ -98,7 +98,7 @@ class BackGroundFilter:
 
     def callback(self, data):
         header = Header()
-        header.stamp = rospy.get_rostime() # - self.startTime
+        header.stamp = (rospy.get_rostime() - self.startTime)
         data.header = header
         frame = CvBridge().imgmsg_to_cv2(data,'bgr8')
         self.image_pubPers.publish(data)
