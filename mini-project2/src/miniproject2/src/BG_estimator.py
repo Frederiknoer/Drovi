@@ -47,10 +47,10 @@ class Tracker:
     def isUnique(self,arr):
         count = 0
         for obj in arr:
-            if(count > 1):
+            if(count > 0):
                 return False
-            if self == obj:
-                print self.track_window, "   :   ", obj.track_window
+            if self == obj and self.car.id > obj.car.id:
+                #print self.track_window, "   :   ", obj.track_window
                 count += 1
         return True
 
