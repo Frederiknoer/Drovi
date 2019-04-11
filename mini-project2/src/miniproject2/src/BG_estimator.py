@@ -22,7 +22,7 @@ class Tracker:
         #self.roi = np.array("I",[x-20,y-20,x+20,y+20])
 
         #self.roi = frame[y-20:y+20 , x-20:x+20]
-        self.track_window = (int(x-10),int(y-10),int(20),int(20))
+        self.track_window = (int(x-12),int(y-20),int(24),int(40))
 
         #hsv_roi = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         #mask = cv2.inRange(hsv_roi, np.array((0., 60., 32.)), np.array((180., 255., 255.)))
@@ -35,8 +35,8 @@ class Tracker:
             return False
         else:
             ret, self.track_window = cv2.meanShift(frame, self.track_window, self.term_crit)
-            self.car.x = self.track_window[0] + 10
-            self.car.y = self.track_window[1] + 10
+            self.car.x = self.track_window[0] + 12
+            self.car.y = self.track_window[1] + 20
             self.car.roi = self.track_window
         return True
 
