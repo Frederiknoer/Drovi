@@ -83,6 +83,7 @@ class KFros:
         if len(self.KF_array.arr) > 0:
             self.KF_array.arrayPredict()
         carlist = data.listOfCars
+        self.car_array_pub = []
 
         if len(carlist) > 0:
             for car in carlist:
