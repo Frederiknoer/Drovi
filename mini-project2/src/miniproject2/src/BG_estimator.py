@@ -130,10 +130,10 @@ class BackGroundFilter:
 
 
 
-        for obj in self.track_list:
+        for i, obj in  enumerate(self.track_list):
             if not obj.isUnique(self.track_list):
                 #print obj.track_window
-                self.track_list.remove(obj)
+                del self.track_list[i]
             elif not obj.update_pos(fgmask):
                 self.track_list.remove(obj)
             else:
