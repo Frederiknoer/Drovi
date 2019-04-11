@@ -24,9 +24,9 @@ class KalmanFilterVideo:
                                 [0., 0., 1000., 0.],
                                 [0., 0., 0., 1000.]])
 
-        self.KF.Q = np.eye(4) * .01
-        self.KF.R = np.array([  [15., 0.],
-                                [0., 15.]])
+        self.KF.Q = np.eye(4) * .001
+        self.KF.R = np.array([  [10., 0.],
+                                [0., 10.]])
 
         self.KF.H = np.array([  [1.,0.,0.,0.,],
                                 [0.,0.,1.,0.,]])

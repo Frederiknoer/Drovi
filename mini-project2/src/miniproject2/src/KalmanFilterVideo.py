@@ -14,7 +14,7 @@ class KalmanFilterVideo:
         self.x_pos = x_pos
         self.y_pos = y_pos
         self.speed = 0.0
-        self.dt = 0.1
+        self.dt = 1.0
         self.update_counter = 0
 
         self.KF = KalmanFilter(dim_x=4, dim_z=2)
@@ -24,12 +24,12 @@ class KalmanFilterVideo:
                                 [0., 0., 1000., 0.],
                                 [0., 0., 0., 1000.]])
 
-        self.KF.Q = np.eye(4) * .01
-        self.KF.R = np.array([  [5., 0.],
-                                [0., 5.]])
+        self.KF.Q = np.eye(4) * .001
+        self.KF.R = np.array([  [10., 0.],
+                                [0., 10.]])
 
-        self.KF.H = np.array([  [1.,0.,0.,0.,],
-                                [0.,0.,1.,0.,]])
+        self.KF.H = np.array([  [1,0.,0.,0.,],
+                                [0.,0.,1,0.,]])
 
         self.KF.F = np.array(([ [1., self.dt, 0., 0.],
                                 [0., 1., 0., 0.],

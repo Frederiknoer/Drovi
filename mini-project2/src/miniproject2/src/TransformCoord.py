@@ -7,7 +7,6 @@ from cv_bridge import CvBridge
 from miniproject2.msg import Car, Cars
 
 
-
 class Projection:
     def __init__(self):
         rospy.init_node('TransformationCoord', anonymous=True)
@@ -40,8 +39,8 @@ class Projection:
             proj_x = (self.H[0][0]*pos[0] + self.H[0][1]*pos[1] + self.H[0][2])/w
             proj_y = (self.H[1][0] * pos[0] + self.H[1][1] * pos[1] + self.H[1][2]) / w
             #print proj, "\n"
-            car.x = int(proj_x)
-            car.y = int(proj_y)
+            car.x = np.uint16(proj_x)
+            car.y = np.uint16(proj_y)
             cv2.circle(self.frame,(car.x,car.y),20,np.array([200,10,200]),2)
         #perspect_image = CvBridge().cv2_to_imgmsg(self.frame,'bgr8')
         #self.image_pub.publish(perspect_image)
@@ -56,5 +55,3 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print("Shutting down")
     cv2.destroyAllWindows()
-
-

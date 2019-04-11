@@ -56,7 +56,7 @@ class DrawTracking:
         #print("Data income")
         font = cv2.FONT_HERSHEY_PLAIN
         even_x = 0
-        odd_x = 1700
+        odd_x = 1600
         colour = np.array([255,255,255])
         txt_scale = 2
         radius = 12
@@ -74,9 +74,7 @@ class DrawTracking:
         self.dt = (self.sec_dt) + (self.ns_dt/(math.pow(10,9)))
 
 
-        print(self.dt)
-
-        time = minutes + seconds + m_seconds
+        time = (minutes + seconds + m_seconds)
         cv2.putText(frame, time,(75, 75), font, fontScale=5, color=np.array([0,0,255]), thickness=5)
 
         for car in self.car_list:
@@ -87,7 +85,7 @@ class DrawTracking:
             #print(len(self.car_list_vel))
             for vel_car in self.car_list_vel:
                 if vel_car.id == car.id:
-                    imgtext2 = "Vel: " + str((vel_car.vel/self.dt)*3.6)
+                    imgtext2 = "Vel: " + str((vel_car.vel/self.dt)*3.6)[0:4] + " Km/h"
                     break
 
             if car.id % 2 == 0: #even
