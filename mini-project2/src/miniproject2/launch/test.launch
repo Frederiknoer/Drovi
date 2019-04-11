@@ -6,7 +6,7 @@
   <node name="TransformationCoord" pkg="miniproject2" type="TransformCoord.py"/>
   <node name="KF" pkg="miniproject2" type="KalmanFilterVideo.py"/>
   <node name="KF_proj" pkg="miniproject2" type="KalmanFilterVideoProj.py"/>
-  <!--<node name="Draw_Tracking" pkg="miniproject2" type="DrawTracking.py"/> -->
+  <node name="Draw_Tracking" pkg="miniproject2" type="DrawTracking.py"/>
   <!--<node name="rqt_graph" pkg="rqt_graph" type="rqt_graph" />
   <node name="image_view_analyzed_image" pkg="rqt_image_view" type="rqt_image_view" args="image:=/analyzed_image" />-->
 
