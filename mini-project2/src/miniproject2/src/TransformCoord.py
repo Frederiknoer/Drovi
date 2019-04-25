@@ -7,7 +7,6 @@ from cv_bridge import CvBridge
 from miniproject2.msg import Car, Cars
 
 
-
 class Projection:
     def __init__(self):
         rospy.init_node('TransformationCoord', anonymous=True)
@@ -18,12 +17,14 @@ class Projection:
 
         self.car_pub = rospy.Publisher("Cars_list_proj",Cars,queue_size=10)
         self.car_sub = rospy.Subscriber("Cars_list",Cars,self.callback)
-        #self.image_sub = rospy.Subscriber("Image_Perspect_filtered",Image,self.callback_image)
-        #self.image_pub = rospy.Publisher("Image_perspect_test",Image,queue_size=10)
+        self.image_sub = rospy.Subscriber("Image_original",Image,self.callback_image)
+        self.image_pub = rospy.Publisher("Image_perspect_test",Image,queue_size=10)
         self.frame = np.array([])
 
     def callback_image(self,data):
         self.frame = CvBridge().imgmsg_to_cv2(data, 'bgr8')
+        frame1 = cv2.warpPerspective(self.frame, self.H, (579, 1000))#[self.upperleft[1]:self.buttomright[1],self.upperleft[0]:self.buttomright[0]]
+        self.image_pub.publish(CvBridge().cv2_to_imgmsg(frame1, "bgr8"))
 
 
     def callback(self,data):
@@ -40,8 +41,8 @@ class Projection:
             proj_x = (self.H[0][0]*pos[0] + self.H[0][1]*pos[1] + self.H[0][2])/w
             proj_y = (self.H[1][0] * pos[0] + self.H[1][1] * pos[1] + self.H[1][2]) / w
             #print proj, "\n"
-            car.x = int(proj_x)
-            car.y = int(proj_y)
+            car.x = np.uint16(proj_x)
+            car.y = np.uint16(proj_y)
             cv2.circle(self.frame,(car.x,car.y),20,np.array([200,10,200]),2)
         #perspect_image = CvBridge().cv2_to_imgmsg(self.frame,'bgr8')
         #self.image_pub.publish(perspect_image)
@@ -56,5 +57,3 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print("Shutting down")
     cv2.destroyAllWindows()
-
-

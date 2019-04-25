@@ -18,11 +18,11 @@ class Tracker:
         self.pos = np.array([x,y])
         self.timestamp = rospy.rostime.get_rostime()
         # avg color ?
-        self.term_crit = (cv2.TERM_CRITERIA_COUNT, 10,1)
+        self.term_crit = (cv2.TERM_CRITERIA_COUNT, 8, 1)
         #self.roi = np.array("I",[x-20,y-20,x+20,y+20])
 
         #self.roi = frame[y-20:y+20 , x-20:x+20]
-        self.track_window = (int(x-10),int(y-10),int(20),int(20))
+        self.track_window = (int(x-10),int(y-30),int(20),int(60))
 
         #hsv_roi = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         #mask = cv2.inRange(hsv_roi, np.array((0., 60., 32.)), np.array((180., 255., 255.)))
@@ -36,7 +36,7 @@ class Tracker:
         else:
             ret, self.track_window = cv2.meanShift(frame, self.track_window, self.term_crit)
             self.car.x = self.track_window[0] + 10
-            self.car.y = self.track_window[1] + 10
+            self.car.y = self.track_window[1] + 30
             self.car.roi = self.track_window
         return True
 
@@ -114,7 +114,7 @@ class BackGroundFilter:
         listOfCars = []
 
         fgmask = self.fgbg.apply(frame)
-        fgmask = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, self.kernel,iterations=2)
+        fgmask = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, self.kernel,iterations=1)
         fgmask = cv2.morphologyEx(fgmask,cv2.MORPH_DILATE,self.kernel,iterations=2)
 
         cc, labels, stat, cent = cv2.connectedComponentsWithStats(fgmask, 4, cv2.CV_32S)
@@ -122,10 +122,10 @@ class BackGroundFilter:
 
 
         for i in cent:
-            if (i[1] > 1045 and i[1] < 1055 and i[0] > 900 and i[0] < 1100):
+            if (i[1] > 1000 and i[1] < 1010 and i[0] > 970 and i[0] < 1040):
                 self.track_list.append(Tracker(fgmask,i[0],i[1],self.BOTid))
                 self.BOTid += 2
-            elif (i[1] > 245 and i[1] < 255 and i[0] > 620 and i[0] < 720):
+            elif (i[1] > 245 and i[1] < 255 and i[0] > 650 and i[0] < 700):
                 self.track_list.append(Tracker(fgmask, i[0], i[1], self.TOPid))
                 self.TOPid += 2
 
@@ -133,6 +133,9 @@ class BackGroundFilter:
         #     #print stat[ind][4]
         #     if stat[ind][4] < 2000 and stat[ind][4]>5:
         #         cv2.circle(fgmask,(int(i[0]),int(i[1])),20,np.array([200,10,200]),2)
+
+        #for obj in self.track_list:
+            #cv2.rectangle(fgmask,(obj.car.roi[0],obj.car.roi[1]),(obj.car.roi[0]+obj.car.roi[2],obj.car.roi[1]+obj.car.roi[3]),127,thickness=4)
 
         BG_filtered = CvBridge().cv2_to_imgmsg(fgmask)
 
@@ -164,9 +167,3 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print("Shutting down")
     cv2.destroyAllWindows()
-
-
-
-
-
-
