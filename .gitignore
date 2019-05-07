@@ -11,3 +11,8 @@ mini-project2/.catkin_tools/*
 *.mp4
 *.xml
 mini-project3/img
+mini-project4/build/*
+mini-project4/devel/*
+mini-project4/logs/*
+mini-project4/src/rotors_simulator/*
+mini-project4/.catkin_tools/*
