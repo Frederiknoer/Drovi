@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="rmurv2_marker">
+    <static>true</static>
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>3 3 0.05</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <pose>0.0 0.0 0 0 0 0</pose>
+        <cast_shadows>false</cast_shadows>
+        <geometry>
+          <box>
+            <size>3 3 0.05</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://rmurv2_marker/materials/scripts</uri>
+            <uri>model://rmurv2_marker/materials/textures</uri>
+            <name>vrc/marker</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>
