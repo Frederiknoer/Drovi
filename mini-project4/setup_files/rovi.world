@@ -8,6 +8,14 @@
       <uri>model://sun</uri>
     </include>
 
+	<scene>
+	  <sky>
+	    <clouds>
+	      <speed>12</speed>
+	    </clouds>
+	  </sky>
+	</scene>
+
     <!-- Only one ROS interface plugin is required per world, as any other plugin can connect a Gazebo
          topic to a ROS topic (or vise versa). -->
     <plugin name="ros_interface_plugin" filename="librotors_gazebo_ros_interface_plugin.so"/>
