@@ -1,0 +1,100 @@
+<launch>
+  <!-- perspective correction calibration points -->
+  <!-- image coordinates in pixels -->
+  <!-- world coordinates in meter -->
+  <param name="calibrate_a_world_x" value="3.0" />
+  <param name="calibrate_a_world_y" value="4.0" />
+  <param name="calibrate_a_image_x" value="0.0" />
+  <param name="calibrate_a_image_y" value="0.0" />
+
+  <param name="calibrate_b_world_x" value="3.0" />
+  <param name="calibrate_b_world_y" value="-4.0" />
+  <param name="calibrate_b_image_x" value="799.0" />
+  <param name="calibrate_b_image_y" value="0.0" />
+
+  <param name="calibrate_c_world_x" value="-3.0" />
+  <param name="calibrate_c_world_y" value="4.0" />
+  <param name="calibrate_c_image_x" value="0.0" />
+  <param name="calibrate_c_image_y" value="599.0" />
+
+  <param name="calibrate_d_world_x" value="-3.0" />
+  <param name="calibrate_d_world_y" value="-4.0" />
+  <param name="calibrate_d_image_x" value="799.0" />
+  <param name="calibrate_d_image_y" value="599.0" />
+  <param name="image_downscale_factor" value="1.0" />
+
+  <arg name="mav_name" default="hummingbird"/>
+  <arg name="world_name" default="rovi2_assignment4"/>
+  <arg name="enable_logging" default="false" />
+  <arg name="enable_ground_truth" default="true" />
+  <arg name="log_file" default="$(arg mav_name)" />
+
+  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
+  <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/$(arg world_name).world"/>
+    <!-- <arg name="debug" value="true"/> -->
+    <arg name="paused" value="false"/>
+    <!-- <arg name="gui" value="false"/> -->
+  </include>
+
+  <group ns="$(arg mav_name)">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg log_file)"/>
+    </include>
+    <!--<node name="joy_node" pkg="joy" type="joy_node" />-->
+    <!--<node name="rotors_joy_interface" pkg="rotors_joy_interface" type="rotors_joy_interface" />-->
+    <node name="roll_pitch_yawrate_thrust_controller_node" pkg="rotors_control" type="roll_pitch_yawrate_thrust_controller_node" respawn="true" output="screen">
+      <rosparam
+        command="load" file="$(find rotors_gazebo)/resource/roll_pitch_yawrate_thrust_controller_$(arg mav_name).yaml" />
+      <rosparam command="load" file="$(find rotors_gazebo)/resource/$(arg mav_name).yaml" />
+      <remap from="odometry" to="odometry_sensor1/odometry" />
+    </node>
+  </group>
+
+  <node name="rovi2_4_uav_stability" pkg="uav_quad_stability" type="rovi2_4_uav_stability.py" output="screen" />
+
+  <!--
+  <node pkg="markerlocator" name="markerlocator" type="MarkerLocatorROS.py" output="screen">
+    <param name="markerimage_sub" value="/hummingbird/camera_/image_raw" />
+    <param name="markerpose_pub" value="/markerlocator/markerpose" />
+    <param name="marker_order" value="4" />
+    <param name="marker_size" value="28" />
+    <param name="show_image" value="True" />
+    <param name="print_debug_messages" value="True" />
+  </node>
+  -->
+
+  <group ns="pid_controllers">
+    <node name="controller" pkg="pid" ns="altitude_rate" type="controller" >
+        <param name="Kp" value="1.0" />
+        <param name="Ki" value="0.01" />
+        <param name="Kd" value="0.0" />
+        <param name="upper_limit" value="10" />
+        <param name="lower_limit" value="-10" />
+        <param name="windup_limit" value="40.0" />
+    </node>
+    <node name="controller" pkg="pid" ns="altitude" type="controller" >
+        <param name="Kp" value="1.0" />
+        <param name="Ki" value="0.0" />
+        <param name="Kd" value="0.4" />
+        <param name="upper_limit" value="10" />
+        <param name="lower_limit" value="-10" />
+        <param name="windup_limit" value="40.0" />
+    </node>
+  <node name="controller" pkg="pid" ns="yaw" type="controller" >
+        <param name="Kp" value="1.0" />
+        <param name="Ki" value="0.0" />
+        <param name="Kd" value="0.0" />
+        <param name="upper_limit" value="3" />
+        <param name="lower_limit" value="-3" />
+        <param name="windup_limit" value="3.14" />
+        <param name="max_loop_frequency" value="100.0" />
+        <param name="min_loop_frequency" value="100.0" />
+    </node>
+  </group>
+</launch>

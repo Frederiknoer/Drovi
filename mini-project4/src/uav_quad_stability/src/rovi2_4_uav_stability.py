@@ -59,14 +59,23 @@ class QuadStabilityNode:
 
 
     def set_uav_setpoint(self, msg):
+        '''
+        Writes the recieved input to a variable.
+        '''
         self.current_uav_setpoint = msg
 
 
     def set_uav_pose(self, msg):
+        '''
+        Writes the recieved height to a variable, and calculates and saves the speed to another variable.
+        '''
         self.yaw = msg.orientation.z
 
 
     def set_uav_pres(self, msg):
+        '''
+        Writes the recieved height to a variable, and calculates and saves the speed to another variable.
+        '''
         now = rospy.get_rostime().to_sec()
         if((now-self.sample_time)>0.05):
             T = now-self.sample_time
@@ -76,15 +85,49 @@ class QuadStabilityNode:
         self.alt_height = self.fluid_pressure_a * msg.fluid_pressure + self.fluid_pressure_b
 
     def set_yaw_effort(self, msg):
+        '''
+        Writes the recieved output of the yaw PID to a variable.
+        '''
         self.yaw_effort = msg.data
 
+
     def set_alt_effort(self, msg):
+        '''
+        Writes the recieved output of the altitude PID to a variable.
+        '''
         self.alt_effort = msg.data
 
+
     def set_alt_rate_effort(self, msg):
+        '''
+        Writes the recieved output of the altitude-rate PID to a variable.
+        '''
         self.alt_rate_effort = msg.data
 
+
     def timer_callback(self, event):
+        '''
+        Pass the variables to the relevant publishers.self
+
+        yaw PID:
+            input.orientation.z -> setpoint
+            measured_yaw -> state
+
+        Altitude PID:
+            input.position.z (how high we want to go) -> setpoint
+            measured_height -> state
+
+        Altitude-rate PID:
+            altitude_PID_output -> setpoint
+            estimated_speed -> state
+
+        RollPitchYawrateThrust (input to UAV):
+            input.pitch -> pitch
+            input.roll -> roll
+            yaw_PID_output -> yaw-rate
+            altitude_rate_PID_output -> thrust
+        '''
+
         # Pass wished yaw position (must be between -1 and 1) and measured yaw
         self.yaw_setpoint_pub.publish(self.current_uav_setpoint.orientation.z)
         self.yaw_state_pub.publish(self.yaw)
