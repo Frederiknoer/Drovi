@@ -15,6 +15,7 @@ echo "Prepared marker for detection"
 cp -r ./rmurv2_marker ./src/rotors_simulator/rotors_gazebo/models
 catkin build
 
+echo "   "
 echo "To run do the following: "
-echo "1. source ./devel/setup.bash "
+echo "1. source devel/setup.bash "
 echo "2. roslaunch rotors_gazebo rovi.launch "
