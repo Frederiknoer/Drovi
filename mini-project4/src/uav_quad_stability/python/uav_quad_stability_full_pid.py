@@ -30,6 +30,7 @@ class QuadStabilityNode:
         self.motor_speed_pub = rospy.Publisher("/hummingbird/command/motor_speed", Actuators, queue_size=1)
 
 
+
         rospy.Timer(rospy.Duration(1./100.), self.timer_callback)
         rospy.spin()
 
@@ -49,7 +50,7 @@ class QuadStabilityNode:
         self.altitude_state_pub.publish(self.current_uav_pose.position.z)
 
         ac = Actuators()
-        alt_ref = 490
+        alt_ref = 400
         output = alt_ref #+self.alt_effort
         ac.angular_velocities = [output,output,output,output]
         self.motor_speed_pub.publish(ac)

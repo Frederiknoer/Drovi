@@ -58,7 +58,6 @@
 
   <node name="rovi2_4_uav_stability" pkg="uav_quad_stability" type="rovi2_4_uav_stability.py" output="screen" />
 
-  <!--
   <node pkg="markerlocator" name="markerlocator" type="MarkerLocatorROS.py" output="screen">
     <param name="markerimage_sub" value="/hummingbird/camera_/image_raw" />
     <param name="markerpose_pub" value="/markerlocator/markerpose" />
@@ -67,7 +66,6 @@
     <param name="show_image" value="True" />
     <param name="print_debug_messages" value="True" />
   </node>
-  -->
 
   <group ns="pid_controllers">
     <node name="controller" pkg="pid" ns="altitude_rate" type="controller" >
