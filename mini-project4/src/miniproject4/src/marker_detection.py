@@ -11,12 +11,14 @@ import message_filters
 import math
 import sys
 
-sys.path.insert(0, 'fiducial/nfoldedge/')
+from miniproject4.msg import markerpose
 
-from MarkerLocator import MarkerPose
-from MarkerLocator import MarkerTracker
-from MarkerLocator.msg import markerpose
+sys.path.insert(0, './fiducial/nfoldedge/')
+from MarkerLocator import MarkerPose, MarkerTracker
+#from miniproject4.MarkerLocator import MarkerPose, MarkerTracker
 
+
+print sys.path
 
 class markerDetection:
     def __init__(self):
@@ -30,9 +32,16 @@ class markerDetection:
         # an unique orientation
         self.tracker.track_marker_with_missing_black_leg = True
 
+        self.aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_250)
+
+        self.parameters = cv2.aruco.DetectorParameters_create()
+
+
         self.image_sub = rospy.Subscriber("hummingbird/camera_/image_raw", Image, self.callback)
-        self.markerpose_pub = rospy.Publisher("nFold_markerpose",markerpose,queue_size=10)
+        self.markerpose_pub = rospy.Publisher("nFold_markerpose", markerpose,queue_size=10)
         self.image_pub = rospy.Publisher("nFold_markerimage", Image, queue_size=10)
+
+
 
 
 
@@ -44,10 +53,9 @@ class markerDetection:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         pose = self.tracker.locate_marker(gray)
-        cv2.circle(frame, (pose.x, pose.y), 20, (0, 0, 255), 2)
         #print(pose.quality)
 
-        markerpose_msg = MarkerPose
+        markerpose_msg = markerpose()
         markerpose_msg.header = data.header
         markerpose_msg.order = pose.order
         markerpose_msg.x = pose.x
@@ -55,9 +63,17 @@ class markerDetection:
         markerpose_msg.theta = pose.theta
         markerpose_msg.quality = pose.quality
 
+        if markerpose_msg.quality > 0.7:
+            cv2.circle(frame, (pose.x, pose.y), 20, (0, 0, 255), 2)
         self.markerpose_pub.publish(markerpose_msg)
 
-        self.image_pub.publish(CvBridge().cv2_to_imgmsg(frame))
+        self.image_pub.publish(CvBridge().cv2_to_imgmsg(frame,'bgr8'))
+
+        ##custom_dictionary = cv2.aruco.custom_dictionary(6, 4)
+        #cv2.aruco.detectMarkers(frame)
+        #markers = cv2.aruco.detectMarkers(gray, cv2.getPrede,parameters=parameters)
+        corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, self.aruco_dict, parameters=self.parameters)
+        frame_markers = cv2.aruco.drawDetectedMarkers(frame.copy(), corners, ids)
 
 if __name__ == '__main__':
     print "marker detection node started"
