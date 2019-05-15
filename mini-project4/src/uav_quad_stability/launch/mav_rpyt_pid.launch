@@ -1,0 +1,63 @@
+<launch>
+  <arg name="mav_name" default="hummingbird"/>
+  <arg name="world_name" default="basic"/>
+  <arg name="enable_logging" default="false" />
+  <arg name="enable_ground_truth" default="true" />
+  <arg name="log_file" default="$(arg mav_name)" />
+
+  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
+  <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/$(arg world_name).world"/>
+    <!-- <arg name="debug" value="true"/> -->
+    <arg name="paused" value="false"/>
+    <!-- <arg name="gui" value="false"/> -->
+  </include>
+
+  <group ns="$(arg mav_name)">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg log_file)"/>
+    </include>
+    <!--<node name="joy_node" pkg="joy" type="joy_node" />-->
+    <!--<node name="rotors_joy_interface" pkg="rotors_joy_interface" type="rotors_joy_interface" />-->
+    <node name="roll_pitch_yawrate_thrust_controller_node" pkg="rotors_control" type="roll_pitch_yawrate_thrust_controller_node" respawn="true" output="screen">
+      <rosparam
+        command="load" file="$(find rotors_gazebo)/resource/roll_pitch_yawrate_thrust_controller_$(arg mav_name).yaml" />
+      <rosparam command="load" file="$(find rotors_gazebo)/resource/$(arg mav_name).yaml" />
+      <remap from="odometry" to="odometry_sensor1/odometry" />
+    </node>
+  </group>
+
+  <group ns="pid_controllers">
+    <node name="controller" pkg="pid" ns="altitude_rate" type="controller" >
+        <param name="Kp" value="0.9" />
+        <param name="Ki" value="0.2" />
+        <param name="Kd" value="0.0" />
+        <param name="upper_limit" value="0.2" />
+        <param name="lower_limit" value="-0.2" />
+        <param name="windup_limit" value="4.0" />
+    </node>
+    <node name="controller" pkg="pid" ns="altitude" type="controller" >
+        <param name="Kp" value="0.9" />
+        <param name="Ki" value="0.2" />
+        <param name="Kd" value="0.0" />
+        <param name="upper_limit" value="0.2" />
+        <param name="lower_limit" value="-0.2" />
+        <param name="windup_limit" value="4.0" />
+    </node>
+  <node name="controller" pkg="pid" ns="yaw" type="controller" >
+        <param name="Kp" value="1.0" />
+        <param name="Ki" value="0.0" />
+        <param name="Kd" value="0.0" />
+        <param name="upper_limit" value="3" />
+        <param name="lower_limit" value="-3" />
+        <param name="windup_limit" value="3.14" />
+        <param name="max_loop_frequency" value="100.0" />
+        <param name="min_loop_frequency" value="100.0" />
+    </node>
+  </group>
+</launch>
