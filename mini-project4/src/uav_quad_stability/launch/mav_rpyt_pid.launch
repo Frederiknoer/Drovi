@@ -1,6 +1,6 @@
 <launch>
   <arg name="mav_name" default="hummingbird"/>
-  <arg name="world_name" default="basic"/>
+  <arg name="world_name" default="rovi"/>
   <arg name="enable_logging" default="false" />
   <arg name="enable_ground_truth" default="true" />
   <arg name="log_file" default="$(arg mav_name)" />
@@ -58,4 +58,7 @@
         <param name="windup_limit" value="3.14" />
     </node>
   </group>
+
+  <node pkg="uav_quad_stability" name="uav_quad_stability" type="uav_quad_stability_rpyt.py" output="screen" />
+
 </launch>
