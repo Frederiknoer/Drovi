@@ -114,9 +114,9 @@ class markerDetection:
         markerpose_msg.quality = pose.quality
 
 
-        if markerpose_msg.quality > 0.8:
+        if markerpose_msg.quality > 0.5:
             cv2.circle(frame, (pose.x, pose.y), 20, (0, 0, 255), 2)
-            orientation = min(math.atan2(-(pose.x -self.image_width/2),pose.y-self.image_height/2),  (math.pi - math.atan2(-(pose.x -self.image_width/2),pose.y-self.image_height/2)))
+            orientation = min(abs(math.atan2(-(pose.x -self.image_width/2),pose.y-self.image_height/2)),  abs((math.pi - math.atan2(-(pose.x -self.image_width/2),pose.y-self.image_height/2))))
             #print math.degrees(orientation)
             print orientation
             self.markerpose_pub.publish(orientation)
@@ -143,20 +143,21 @@ class markerDetection:
 
         #self.markerpose_pub.publish(markerpose_msg)
 
-        #self.image_pub.publish(CvBridge().cv2_to_imgmsg(frame,'bgr8'))
+        self.image_pub.publish(CvBridge().cv2_to_imgmsg(frame,'bgr8'))
 
         ##custom_dictionary = cv2.aruco.custom_dictionary(6, 4)
         #cv2.aruco.detectMarkers(frame)
         #markers = cv2.aruco.detectMarkers(gray, cv2.getPrede,parameters=parameters)
         corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, self.aruco_dict, parameters=self.parameters)
         #print corners, ids
-        if ids != None:
+        if any(x != None for x in ids):
+        #if ids != None:
             retstat = 5 #self.markerstatus_pub.publish(5)
 
         #self.determineHeight(corners[0]);
         frame_markers = cv2.aruco.drawDetectedMarkers(frame.copy(), corners, ids)
 
-        self.image_pub.publish(CvBridge().cv2_to_imgmsg(frame_markers, 'bgr8'))
+        #self.image_pub.publish(CvBridge().cv2_to_imgmsg(frame_markers, 'bgr8'))
         self.markerstatus_pub.publish(retstat)
 
     def determinePos(self, x, y):
