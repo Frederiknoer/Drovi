@@ -146,7 +146,7 @@ class QuadStabilityNode:
 
         rpyt = RollPitchYawrateThrust()
         # Define standard thrust, this should be roughly when the drone is standing still in the air.
-        thrust_ref = 7.125
+        thrust_ref = 7.115
         output = thrust_ref+self.alt_rate_effort
         # Pass thrust to uav
         rpyt.thrust.z = thrust_ref+self.alt_rate_effort
