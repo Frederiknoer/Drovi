@@ -67,7 +67,7 @@ class QuadStateNode:
                 self.pose.orientation.x, self.pose.orientation.y, self.pose.orientation.z, self.pose.orientation.w = quaternion_from_euler(0,0,self.heading)
                 self.setpoint_pub.publish(self.pose)
 
-            if abs(self.heading - self.current_yaw) < 0.1:
+            if self.heading < 0.1:
                 self.state = 3
         #Align
         if self.state == 3:
