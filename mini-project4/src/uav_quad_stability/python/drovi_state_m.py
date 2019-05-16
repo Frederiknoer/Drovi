@@ -5,7 +5,7 @@ import cv2
 from geometry_msgs.msg import Pose
 from sensor_msgs.msg import Imu, FluidPressure
 from nav_msgs.msg import Odometry
-from std_msgs.msg import Float64
+from std_msgs.msg import Float64, Int8
 from mav_msgs.msg import RollPitchYawrateThrust
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 import math
@@ -20,7 +20,10 @@ class QuadStateNode:
         rospy.init_node('drovi_state_m')
         self.current_alt = 0
         self.current_yaw = 0
+
         self.heading = 0
+        self.tracker_status = 0
+
         self.pose = Pose()
         self.pose.orientation.x, self.pose.orientation.y, self.pose.orientation.z, self.pose.orientation.w = 0,0,0,0
         self.pose.position.x, self.pose.position.y, self.pose.position.z = 0,0,0
@@ -30,6 +33,7 @@ class QuadStateNode:
         self.odometry_pose = rospy.Subscriber("/hummingbird/odometry_sensor1/pose", Pose, self.set_odom_pose)
         self.altitude = rospy.Subscriber("/pid_controllers/altitude/state", Float64, self.set_current_alt)
         self.marker_pose = rospy.Subscriber("/nFold_markerPose", Float64, self.set_heading)
+        self.tracker_status = rospy.Subscriber("/marker_status", Int8, self.set_tracker_status)
 
         self.state = 1
         rospy.Timer(rospy.Duration(1./100.), self.state_machine)
@@ -45,14 +49,16 @@ class QuadStateNode:
     def set_heading(self, msg):
         self.heading = msg
 
-    def state_machine(self, state):
+    def set_tracker_status(self, msg):
+        self.tracker_status = msg
 
+    def state_machine(self, state):
         #Search Mode
         if self.state == 1:
             self.pose.position.z = 30
             self.setpoint_pub.publish(self.pose)
 
-            if self.current_alt > 29.5 and self.current_alt < 30.5:
+            if (self.current_alt > 29.5 and self.current_alt < 30.5) or (self.tracker_status == 1):
                 self.state = 2
 
         #Marker Tracking
@@ -63,13 +69,26 @@ class QuadStateNode:
 
             if abs(self.heading - self.current_yaw) < 0.1:
                 self.state = 3
-
+        #Align
         if self.state == 3:
-            self.pose.orientation = quaternion_from_euler(0,0.1,0)
+            if self.tracker_status != 2 and self.tracker_status != 3:
+                self.pose.orientation = quaternion_from_euler(0,0.1,0)
+                self.setpoint_pub(self.pose)
+            elif self.tracker_status == 2:
+                self.pose.orientation = quaternion_from_euler(0,0,0)
+                self.setpoint_pub(self.pose)
+            elif self.tracker_status == 3:
+                self.pose.orientation = quaternion_from_euler(0,0,0)
+                self.state = 4
+
+        if self.state == 4:
+            self.pose.position.z = 3
             self.setpoint_pub(self.pose)
+            if tracker_status == 10:
+                self.state = 5
+
+        if self.state == 5:
             pass
-
-
 
 if __name__ == "__main__":
     node = QuadStateNode()

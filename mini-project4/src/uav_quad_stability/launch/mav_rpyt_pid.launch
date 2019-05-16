@@ -34,37 +34,20 @@
 
   <group ns="pid_controllers">
     <node name="controller" pkg="pid" ns="altitude_rate" type="controller" >
-<<<<<<< HEAD
-        <param name="Kp" value="5" />
-        <param name="Ki" value="0" />
-        <param name="Kd" value="0" />
-        <param name="upper_limit" value="10" />
-        <param name="lower_limit" value="-10" />
+        <param name="Kp" value="2.25" />
+        <param name="Ki" value="0.25" />
+        <param name="Kd" value="0.1" />
+        <param name="upper_limit" value="5" />
+        <param name="lower_limit" value="-2" />
         <param name="windup_limit" value="1.0" />
     </node>
     <node name="controller" pkg="pid" ns="altitude" type="controller" >
-        <param name="Kp" value="5" />
-        <param name="Ki" value="0" />
-        <param name="Kd" value="0" />
-        <param name="upper_limit" value="10" />
-        <param name="lower_limit" value="-10" />
+        <param name="Kp" value="2.5" />
+        <param name="Ki" value="0.25" />
+        <param name="Kd" value="0.1" />
+        <param name="upper_limit" value="5" />
+        <param name="lower_limit" value="-2" />
         <param name="windup_limit" value="1.0" />
-=======
-        <param name="Kp" value="2.5" />
-        <param name="Ki" value="0.4" />
-        <param name="Kd" value="0.1" />
-        <param name="upper_limit" value="0.2" />
-        <param name="lower_limit" value="-0.2" />
-        <param name="windup_limit" value="4.0" />
-    </node>
-    <node name="controller" pkg="pid" ns="altitude" type="controller" >
-        <param name="Kp" value="2.5" />
-        <param name="Ki" value="0.4" />
-        <param name="Kd" value="0.1" />
-        <param name="upper_limit" value="0.2" />
-        <param name="lower_limit" value="-0.2" />
-        <param name="windup_limit" value="4.0" />
->>>>>>> d4c94117487346382011a6ad82779d6ff7901583
     </node>
   <node name="controller" pkg="pid" ns="yaw" type="controller" >
         <param name="Kp" value="1.0" />
@@ -73,8 +56,6 @@
         <param name="upper_limit" value="3" />
         <param name="lower_limit" value="-3" />
         <param name="windup_limit" value="3.14" />
-        <param name="max_loop_frequency" value="100.0" />
-        <param name="min_loop_frequency" value="100.0" />
     </node>
   </group>
 </launch>
