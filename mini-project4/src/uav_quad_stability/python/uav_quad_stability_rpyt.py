@@ -62,6 +62,7 @@ class QuadStabilityNode:
         '''
         Writes the recieved input to a variable.
         '''
+        print(msg)
         self.current_uav_setpoint = msg
 
 

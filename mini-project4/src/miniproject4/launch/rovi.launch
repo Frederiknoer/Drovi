@@ -34,20 +34,20 @@
 
   <group ns="pid_controllers">
     <node name="controller" pkg="pid" ns="altitude_rate" type="controller" >
-        <param name="Kp" value="5" />
-        <param name="Ki" value="0" />
-        <param name="Kd" value="0" />
-        <param name="upper_limit" value="10" />
-        <param name="lower_limit" value="-10" />
-        <param name="windup_limit" value="1.0" />
+        <param name="Kp" value="0.9" />
+        <param name="Ki" value="0.2" />
+        <param name="Kd" value="0.0" />
+        <param name="upper_limit" value="0.2" />
+        <param name="lower_limit" value="-0.2" />
+        <param name="windup_limit" value="4.0" />
     </node>
     <node name="controller" pkg="pid" ns="altitude" type="controller" >
-        <param name="Kp" value="5" />
-        <param name="Ki" value="0" />
-        <param name="Kd" value="0" />
-        <param name="upper_limit" value="10" />
-        <param name="lower_limit" value="-10" />
-        <param name="windup_limit" value="1.0" />
+        <param name="Kp" value="0.9" />
+        <param name="Ki" value="0.2" />
+        <param name="Kd" value="0.0" />
+        <param name="upper_limit" value="0.2" />
+        <param name="lower_limit" value="-0.2" />
+        <param name="windup_limit" value="4.0" />
     </node>
   <node name="controller" pkg="pid" ns="yaw" type="controller" >
         <param name="Kp" value="1.0" />
