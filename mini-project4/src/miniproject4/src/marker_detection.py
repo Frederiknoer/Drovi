@@ -67,13 +67,28 @@ class markerDetection:
             cv2.circle(frame, (pose.x, pose.y), 20, (0, 0, 255), 2)
         self.markerpose_pub.publish(markerpose_msg)
 
-        self.image_pub.publish(CvBridge().cv2_to_imgmsg(frame,'bgr8'))
+        #self.image_pub.publish(CvBridge().cv2_to_imgmsg(frame,'bgr8'))
 
         ##custom_dictionary = cv2.aruco.custom_dictionary(6, 4)
         #cv2.aruco.detectMarkers(frame)
         #markers = cv2.aruco.detectMarkers(gray, cv2.getPrede,parameters=parameters)
         corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, self.aruco_dict, parameters=self.parameters)
+
+        self.determineHeight(corners[0]);
         frame_markers = cv2.aruco.drawDetectedMarkers(frame.copy(), corners, ids)
+
+        self.image_pub.publish(CvBridge().cv2_to_imgmsg(frame_markers, 'bgr8'))
+
+    def determineHeight(self, corners):
+        #diff = corners[0][0] - corners[0][3]
+        crosssection = math.sqrt((corners[0][0][0] - corners[0][3][0])**2 + (corners[0][0][1] - corners[0][3][1])**2)
+        print crosssection
+
+        #position:
+        #x: 2.7
+        #y: 7.7
+        #z: 1.6
+
 
 if __name__ == '__main__':
     print "marker detection node started"
