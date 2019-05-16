@@ -58,4 +58,7 @@
         <param name="windup_limit" value="3.14" />
     </node>
   </group>
+
+  <node pkg="uav_quad_stability" name="uav_quad_stability" type="uav_quad_stability_rpyt.py" output="screen" />
+
 </launch>

@@ -18,4 +18,4 @@ catkin build
 echo "   "
 echo "To run do the following: "
 echo "1. source devel/setup.bash "
-echo "2. roslaunch rotors_gazebo rovi.launch "
+echo "2. roslaunch uav_quad_stability mav_rpyt_pid.launch "
