@@ -8,6 +8,7 @@ from nav_msgs.msg import Odometry
 from std_msgs.msg import Float64, Int8
 from mav_msgs.msg import RollPitchYawrateThrust
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
+from uav_quad_stability.msg import markerpose
 import math
 
 def get_rpy_orientation (orientation_q):
@@ -32,7 +33,7 @@ class QuadStateNode:
 
         self.odometry_pose = rospy.Subscriber("/hummingbird/odometry_sensor1/pose", Pose, self.set_odom_pose)
         self.altitude = rospy.Subscriber("/pid_controllers/altitude/state", Float64, self.set_current_alt)
-        self.marker_pose = rospy.Subscriber("/nFold_markerPose", Float64, self.set_heading)
+        self.marker_pose = rospy.Subscriber("/nFold_markerPose", markerpose, self.set_heading)
         self.tracker_status = rospy.Subscriber("/marker_status", Int8, self.set_tracker_status)
 
         self.state = 1
