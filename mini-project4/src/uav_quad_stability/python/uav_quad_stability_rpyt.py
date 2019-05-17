@@ -82,12 +82,6 @@ class QuadStabilityNode:
     def set_yaw_effort(self, msg):
         self.yaw_effort = msg.data
 
-    def set_roll_effort(self, msg):
-        self.roll_effort = msg.data
-
-    def set_pitch_effort(self, msg):
-        self.pitch_effort = msg.data
-
     def set_alt_effort(self, msg):
         self.alt_effort = msg.data
 

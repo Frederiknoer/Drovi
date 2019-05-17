@@ -25,6 +25,9 @@ class QuadStateNode:
         self.current_y = 0.0
         self.marker_x = 0.0
         self.marker_y = 0.0
+        self.current_dist = 0
+
+        self.heading_adjust = 0.0
 
         self.heading = 99.9
         self.tracker_status = 0
@@ -40,10 +43,14 @@ class QuadStateNode:
         self.marker_pose = rospy.Subscriber("/nFold_markerPose", markerpose, self.set_heading)
         self.tracker_status = rospy.Subscriber("/marker_status", Int8, self.set_tracker_status)
 
+        self.heading_adjust_sub = rospy.Subscriber("/heading_adjust", Float64, self.set_heading_adjust)
+
         self.state = 1
         rospy.Timer(rospy.Duration(1./100.), self.state_machine)
         rospy.spin()
 
+    def set_heading_adjust(self, msg):
+        self.heading_adjust = msg.data
 
     def set_current_alt(self, msg):
         self.current_alt = msg.data
@@ -53,8 +60,8 @@ class QuadStateNode:
         self.current_x, self.current_y = msg.position.x, msg.position.y
 
     def set_heading(self, msg):
-        self.marker_x = msg.x * self.current_alt
-        self.marker_y = msg.y * self.current_alt
+        self.marker_x = msg.x * (self.current_alt -1)
+        self.marker_y = msg.y * (self.current_alt -1)
 
     def set_tracker_status(self, msg):
         self.tracker_status = msg.data
@@ -72,31 +79,30 @@ class QuadStateNode:
 
         #Marker Tracking
         elif self.state == 2:
-            self.heading = math.atan2((self.marker_y+self.current_y),(self.marker_x+self.current_x))
-            self.pose.orientation.x, self.pose.orientation.y, self.pose.orientation.z, self.pose.orientation.w = quaternion_from_euler(0,0,self.heading)
+            self.heading = (math.atan2((self.marker_y+self.current_y),(self.marker_x+self.current_x)))
+            self.pose.orientation.x, self.pose.orientation.y, self.pose.orientation.z, self.pose.orientation.w = quaternion_from_euler(0,0,self.heading + self.heading_adjust)
             self.setpoint_pub.publish(self.pose)
 
-            print("heading: ", self.heading)
+            print("heading: ", self.heading + self.heading_adjust)
             print("Yaw: ", self.current_yaw)
-            #if self.heading < 0.1 and self.heading > -0.1:
-                #self.state = 3
+            if self.heading - 0.01 < self.current_yaw and self.current_yaw < self.heading + 0.01:
+                self.state = 3
         #Align
         elif self.state == 3:
-            if self.tracker_status != 2 and self.tracker_status != 3:
-                self.pose.orientation = quaternion_from_euler(0,0.1,self.heading)
-                self.setpoint_pub.publish(self.pose)
-            elif self.tracker_status == 2:
-                self.pose.orientation = quaternion_from_euler(0,0,self.heading)
-                self.setpoint_pub.publish(self.pose)
-            elif self.tracker_status == 3:
-                self.pose.orientation = quaternion_from_euler(0,0,self.heading)
+            self.pose.orientation.x, self.pose.orientation.y, self.pose.orientation.z, self.pose.orientation.w = quaternion_from_euler(0,0.02,self.heading)
+            self.setpoint_pub.publish(self.pose)
+
+            self.current_dist = math.sqrt(self.marker_x**2 + self.marker_y**2)
+            print("current_dist: ", self.current_dist)
+            if self.current_dist < 3:
                 self.state = 4
 
         elif self.state == 4:
-            self.pose.position.z = 3
-            self.setpoint_pub(self.pose)
-            if tracker_status == 10:
-                self.state = 5
+            self.pose.orientation.x, self.pose.orientation.y, self.pose.orientation.z, self.pose.orientation.w = quaternion_from_euler(0,0,self.heading)
+            self.pose.position.z = 5
+            self.setpoint_pub.publish(self.pose)
+            #if tracker_status == 10:
+                #self.state = 5
 
         elif self.state == 5:
             pass
