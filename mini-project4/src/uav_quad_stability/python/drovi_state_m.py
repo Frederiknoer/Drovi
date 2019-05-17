@@ -50,11 +50,11 @@ class QuadStateNode:
 
     def set_odom_pose(self, msg):
         _, _, self.current_yaw = get_rpy_orientation(msg.orientation)
-        self.current_x, self.current_y, _ = msg.position
+        self.current_x, self.current_y = msg.position.x, msg.position.y
 
     def set_heading(self, msg):
-        self.marker_x = msg.data.x
-        self.marker_y = msg.data.y
+        self.marker_x = msg.x * self.current_alt
+        self.marker_y = msg.y * self.current_alt
 
     def set_tracker_status(self, msg):
         self.tracker_status = msg.data

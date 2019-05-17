@@ -75,7 +75,7 @@ class markerDetection:
 
 
         self.image_sub = rospy.Subscriber("hummingbird/camera_/image_raw", Image, self.callback)
-        self.markerpose_pub = rospy.Publisher("nFold_markerPose", Float64 ,queue_size=10)
+        self.markerpose_pub = rospy.Publisher("nFold_markerPose", markerpose ,queue_size=10)
         self.image_pub = rospy.Publisher("nFold_markerimage", Image, queue_size=10)
         self.markerstatus_pub = rospy.Publisher("marker_status",Int8,queue_size=10)
 
@@ -110,20 +110,22 @@ class markerDetection:
         markerpose_msg.theta = pose.theta
         markerpose_msg.quality = pose.quality
 
-
+        pos = self.determinePos(pose.x,pose.y)
+        markerpose_msg.x = pos[0]
+        markerpose_msg.y = pos[1]
         if markerpose_msg.quality > 0.5:
             cv2.circle(frame, (pose.x, pose.y), 20, (0, 0, 255), 2)
             orientation = min(abs(math.atan2(-(pose.x -self.image_width/2),pose.y-self.image_height/2)),  abs((math.pi - math.atan2(-(pose.x -self.image_width/2),pose.y-self.image_height/2))))
             #print math.degrees(orientation)
             print orientation
-            self.markerpose_pub.publish(orientation)
+            self.markerpose_pub.publish(markerpose_msg)
             #self.markerstatus_pub.publish(1)
             if (orientation > 0.1):
                 retstat = 1
             else:
                 retstat = 2
 
-            pos = self.determinePos(pose.x,pose.y)
+
 
         #elif markerpose_msg.quality > 0.2:
            # self.markerstatus_pub.publish()
@@ -164,10 +166,11 @@ class markerDetection:
         #print "XYZ", xyz.transpose()
         directions = np.matmul(self.R_pose, xyz)
         #print "directions", directions.transpose()
-        self.relativeCoord = 11 * np.matmul(self.cam,xyz)
+        self.relativeCoord = np.matmul(self.cam,xyz)
         #print 11 * directions
         #print self.relativeCoord
-        return math.sqrt(self.relativeCoord[0]**2 + self.relativeCoord[1]**2)
+        #return math.sqrt(self.relativeCoord[0]**2 + self.relativeCoord[1]**2)
+        return self.relativeCoord
 
         #diff = corners[0][0] - corners[0][3]
         #crosssection = math.sqrt((corners[0][0][0] - corners[0][3][0])**2 + (corners[0][0][1] - corners[0][3][1])**2)
