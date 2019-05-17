@@ -37,9 +37,6 @@ def get_roll_matrix(roll_angle):
                      [0, 1, 0],
                      [-np.sin(roll_angle), 0, np.cos(roll_angle)]])
 
-
-print sys.path
-
 class markerDetection:
     def __init__(self):
         rospy.init_node("marker_detection",anonymous=True)

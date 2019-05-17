@@ -8,6 +8,7 @@ from nav_msgs.msg import Odometry
 from std_msgs.msg import Float64, Int8
 from mav_msgs.msg import RollPitchYawrateThrust
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
+from uav_quad_stability.msg import markerpose
 import math
 
 def get_rpy_orientation (orientation_q):
