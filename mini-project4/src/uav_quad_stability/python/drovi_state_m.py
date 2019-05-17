@@ -70,8 +70,8 @@ class QuadStateNode:
 
             print("heading: ", self.heading)
             print("Yaw: ", self.current_yaw)
-            if self.heading < 0.1 and self.heading > -0.1:
-                self.state = 3
+            #if self.heading < 0.1 and self.heading > -0.1:
+                #self.state = 3
         #Align
         elif self.state == 3:
             if self.tracker_status != 2 and self.tracker_status != 3:
