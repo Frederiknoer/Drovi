@@ -78,7 +78,7 @@ class markerDetection:
         self.markerpose_pub = rospy.Publisher("nFold_markerPose", markerpose ,queue_size=10)
         self.image_pub = rospy.Publisher("nFold_markerimage", Image, queue_size=10)
         self.markerstatus_pub = rospy.Publisher("marker_status",Int8,queue_size=10)
-
+        self.arucopose_pub = rospy.Publisher("aruco_markerPose", markerpose, queue_size=10)
 
     def camToDrone(self, X, Y, Z):
         arr = np.array([[X],[Y],[Z],[1]])
@@ -133,11 +133,7 @@ class markerDetection:
             retstat = 0
             #self.markerstatus_pub.publish(0)
 
-            #print "pose x and y", pose.x, pose.y
-
-        if pos < 0.5:
-            retstat = 3
-
+            #print "pose x and y", pose.x, pose.y+
 
 
         #self.markerpose_pub.publish(markerpose_msg)
@@ -150,8 +146,20 @@ class markerDetection:
         corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, self.aruco_dict, parameters=self.parameters)
         #print corners, ids
         if any(x != None for x in ids):
-        #if ids != None:
-            retstat = 5 #self.markerstatus_pub.publish(5)
+            aruco = markerpose()
+            aruco.header = data.header
+            aruco.order = 0
+            aruco.theta = 0
+            aruco.quality = 1
+
+            x = (corners[0][0][0] + corners[0][1][0]+corners[0][2][0] + corners[0][3][0])/4
+            y = (corners[0][0][1] + corners[0][1][1] + corners[0][2][1] + corners[0][3][1]) / 4
+            arucopos = self.determinePos(x, y)
+            aruco.x = arucopos[0]
+            aruco.y = arucopos[1]
+            self.arucopose_pub.publish(aruco)
+
+
 
         #self.determineHeight(corners[0]);
         frame_markers = cv2.aruco.drawDetectedMarkers(frame.copy(), corners, ids)
