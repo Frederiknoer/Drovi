@@ -117,7 +117,7 @@ class markerDetection:
             cv2.circle(frame, (pose.x, pose.y), 20, (0, 0, 255), 2)
             orientation = min(abs(math.atan2(-(pose.x -self.image_width/2),pose.y-self.image_height/2)),  abs((math.pi - math.atan2(-(pose.x -self.image_width/2),pose.y-self.image_height/2))))
             #print math.degrees(orientation)
-            print orientation
+            #print orientation
             self.markerpose_pub.publish(markerpose_msg)
             #self.markerstatus_pub.publish(1)
             if (orientation > 0.1):
@@ -138,7 +138,7 @@ class markerDetection:
 
         #self.markerpose_pub.publish(markerpose_msg)
 
-        self.image_pub.publish(CvBridge().cv2_to_imgmsg(frame,'bgr8'))
+        #self.image_pub.publish(CvBridge().cv2_to_imgmsg(frame,'bgr8'))
 
         ##custom_dictionary = cv2.aruco.custom_dictionary(6, 4)
         #cv2.aruco.detectMarkers(frame)
@@ -151,20 +151,22 @@ class markerDetection:
             aruco.order = 0
             aruco.theta = 0
             aruco.quality = 1
-
-            x = (corners[0][0][0] + corners[0][1][0]+corners[0][2][0] + corners[0][3][0])/4
-            y = (corners[0][0][1] + corners[0][1][1] + corners[0][2][1] + corners[0][3][1]) / 4
-            arucopos = self.determinePos(x, y)
+            #print(corners[0][0][0][0])
+            X = (corners[0][0][0][0] + corners[0][0][1][0]+corners[0][0][2][0] + corners[0][0][3][0])/4
+            Y = (corners[0][0][0][1] + corners[0][0][1][1] + corners[0][0][2][1] + corners[0][0][3][1]) / 4
+            arucopos = self.determinePos(X, Y)
             aruco.x = arucopos[0]
             aruco.y = arucopos[1]
             self.arucopose_pub.publish(aruco)
+            cv2.circle(frame, (int(X), int(Y)), 20, (0, 0, 255), 2)
+
 
 
 
         #self.determineHeight(corners[0]);
         frame_markers = cv2.aruco.drawDetectedMarkers(frame.copy(), corners, ids)
 
-        #self.image_pub.publish(CvBridge().cv2_to_imgmsg(frame_markers, 'bgr8'))
+        self.image_pub.publish(CvBridge().cv2_to_imgmsg(frame_markers, 'bgr8'))
         self.markerstatus_pub.publish(retstat)
 
     def determinePos(self, x, y):

@@ -90,6 +90,8 @@ class QuadStateNode:
         #Marker Tracking
         elif self.state == 2:
             self.heading = (math.atan2((self.marker_y+self.current_y),(self.marker_x+self.current_x)))
+            #self.heading = (math.atan2((self.current_y - self.marker_y),(self.current_x - self.current_x)))
+            #self.heading += math.atan2((self.marker_y),(self.current_x))
             self.pose.orientation.x, self.pose.orientation.y, self.pose.orientation.z, self.pose.orientation.w = quaternion_from_euler(0,0,self.heading + self.heading_adjust)
             self.setpoint_pub.publish(self.pose)
 
@@ -111,25 +113,39 @@ class QuadStateNode:
                 self.state = 4
 
         elif self.state == 4:
-            self.heading = (math.atan2((self.aruco_y+self.current_y),(self.aruco_x+self.current_x)))
+            self.heading = (math.atan2((self.current_y-self.aruco_y ),(self.current_x-self.aruco_x)))
+            self.heading += math.atan2((self.current_y),(self.current_x))
+            #self.heading = (math.atan2((self.aruco_y+self.current_y),(self.aruco_x+self.current_x)))
             self.pose.orientation.x, self.pose.orientation.y, self.pose.orientation.z, self.pose.orientation.w = quaternion_from_euler(0,0,self.heading + self.heading_adjust)
             self.setpoint_pub.publish(self.pose)
+            print ("aruco position", self.aruco_x + self.current_x, self.aruco_y + self.current_y)
             print("heading: ", self.heading + self.heading_adjust)
             print("Yaw: ", self.current_yaw)
             if self.heading - 0.01 < self.current_yaw and self.current_yaw < self.heading + 0.01:
                 self.state = 5
 
         elif self.state == 5:
-            self.pose.orientation.x, self.pose.orientation.y, self.pose.orientation.z, self.pose.orientation.w = quaternion_from_euler(0,0.02,self.heading)
+            if abs(self.heading) > math.pi/2:
+                pitch = 0.01
+            else:
+                pitch = 0.01
+
+            self.pose.orientation.x, self.pose.orientation.y, self.pose.orientation.z, self.pose.orientation.w = quaternion_from_euler(0,pitch,self.heading)
             self.setpoint_pub.publish(self.pose)
 
-            self.current_dist = math.sqrt(self.marker_x**2 + self.marker_y**2)
+            self.current_dist = math.sqrt(self.aruco_x**2 + self.aruco_y**2)
             print("current_dist: ", self.current_dist)
-            if self.current_dist < 0.5:
+            if self.current_dist < 1.2:
                 self.pose.orientation.x, self.pose.orientation.y, self.pose.orientation.z, self.pose.orientation.w = quaternion_from_euler(0,0,self.heading)
+                self.setpoint_pub.publish(self.pose)
+                self.pose.position.z = 2
+                self.setpoint_pub.publish(self.pose)
                 self.state = 6
 
         elif self.state == 6:
+
+            self.pose.position.z = 1
+            self.setpoint_pub.publish(self.pose)
             pass
 
 
