@@ -20,6 +20,10 @@ class QuadStateNode:
         rospy.init_node('drovi_state_m')
         self.current_alt = 0.0
         self.current_yaw = 0.0
+        self.current_x = 0.0
+        self.current_y = 0.0
+        self.marker_x = 0.0
+        self.marker_y = 0.0
 
         self.heading = 99.9
         self.tracker_status = 0
@@ -32,7 +36,7 @@ class QuadStateNode:
 
         self.odometry_pose = rospy.Subscriber("/hummingbird/odometry_sensor1/pose", Pose, self.set_odom_pose)
         self.altitude = rospy.Subscriber("/pid_controllers/altitude/state", Float64, self.set_current_alt)
-        self.marker_pose = rospy.Subscriber("/nFold_markerPose", Float64, self.set_heading)
+        self.marker_pose = rospy.Subscriber("/nFold_markerPose", markerpose, self.set_heading)
         self.tracker_status = rospy.Subscriber("/marker_status", Int8, self.set_tracker_status)
 
         self.state = 1
@@ -45,9 +49,11 @@ class QuadStateNode:
 
     def set_odom_pose(self, msg):
         _, _, self.current_yaw = get_rpy_orientation(msg.orientation)
+        self.current_x, self.current_y, _ = msg.position
 
     def set_heading(self, msg):
-        self.heading = msg.data
+        self.marker_x = msg.data.x
+        self.marker_y = msg.data.y
 
     def set_tracker_status(self, msg):
         self.tracker_status = msg.data
@@ -65,6 +71,7 @@ class QuadStateNode:
 
         #Marker Tracking
         elif self.state == 2:
+            self.heading = math.atan2((self.marker_y+self.current_y),(self.marker_x+self.current_x))
             self.pose.orientation.x, self.pose.orientation.y, self.pose.orientation.z, self.pose.orientation.w = quaternion_from_euler(0,0,self.heading)
             self.setpoint_pub.publish(self.pose)
 
