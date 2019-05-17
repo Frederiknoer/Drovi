@@ -27,6 +27,9 @@ class QuadStateNode:
         self.marker_y = 0.0
         self.current_dist = 0
 
+        self.aruco_x = 0.0
+        self.aruco_y = 0.0
+
         self.heading_adjust = 0.0
 
         self.heading = 99.9
@@ -40,7 +43,10 @@ class QuadStateNode:
 
         self.odometry_pose = rospy.Subscriber("/hummingbird/odometry_sensor1/pose", Pose, self.set_odom_pose)
         self.altitude = rospy.Subscriber("/pid_controllers/altitude/state", Float64, self.set_current_alt)
+
         self.marker_pose = rospy.Subscriber("/nFold_markerPose", markerpose, self.set_heading)
+        self.aruco_pose = rospy.Subscriber("/aruco_markerPose", markerpose, self.set_aruco)
+
         self.tracker_status = rospy.Subscriber("/marker_status", Int8, self.set_tracker_status)
 
         self.heading_adjust_sub = rospy.Subscriber("/heading_adjust", Float64, self.set_heading_adjust)
@@ -62,6 +68,10 @@ class QuadStateNode:
     def set_heading(self, msg):
         self.marker_x = msg.x * (self.current_alt -1)
         self.marker_y = msg.y * (self.current_alt -1)
+
+    def set_aruco(self, msg):
+        self.aruco_x = msg.x * (self.current_alt -1)
+        self.aruco_y = msg.y * (self.current_alt -1)
 
     def set_tracker_status(self, msg):
         self.tracker_status = msg.data
@@ -95,17 +105,33 @@ class QuadStateNode:
             self.current_dist = math.sqrt(self.marker_x**2 + self.marker_y**2)
             print("current_dist: ", self.current_dist)
             if self.current_dist < 3:
+                self.pose.orientation.x, self.pose.orientation.y, self.pose.orientation.z, self.pose.orientation.w = quaternion_from_euler(0,0,self.heading)
+                self.pose.position.z = 5
+                self.setpoint_pub.publish(self.pose)
                 self.state = 4
 
         elif self.state == 4:
-            self.pose.orientation.x, self.pose.orientation.y, self.pose.orientation.z, self.pose.orientation.w = quaternion_from_euler(0,0,self.heading)
-            self.pose.position.z = 5
+            self.heading = (math.atan2((self.aruco_y+self.current_y),(self.aruco_x+self.current_x)))
+            self.pose.orientation.x, self.pose.orientation.y, self.pose.orientation.z, self.pose.orientation.w = quaternion_from_euler(0,0,self.heading + self.heading_adjust)
             self.setpoint_pub.publish(self.pose)
-            #if tracker_status == 10:
-                #self.state = 5
+            print("heading: ", self.heading + self.heading_adjust)
+            print("Yaw: ", self.current_yaw)
+            if self.heading - 0.01 < self.current_yaw and self.current_yaw < self.heading + 0.01:
+                self.state = 5
 
         elif self.state == 5:
+            self.pose.orientation.x, self.pose.orientation.y, self.pose.orientation.z, self.pose.orientation.w = quaternion_from_euler(0,0.02,self.heading)
+            self.setpoint_pub.publish(self.pose)
+
+            self.current_dist = math.sqrt(self.marker_x**2 + self.marker_y**2)
+            print("current_dist: ", self.current_dist)
+            if self.current_dist < 0.5:
+                self.pose.orientation.x, self.pose.orientation.y, self.pose.orientation.z, self.pose.orientation.w = quaternion_from_euler(0,0,self.heading)
+                self.state = 6
+
+        elif self.state == 6:
             pass
+
 
 if __name__ == "__main__":
     node = QuadStateNode()
